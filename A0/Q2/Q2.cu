@@ -6,8 +6,7 @@
 
 __global__ void add_vec(float *d_a, int n){		                         //7.CUDA Kernel that computes sum
 	int i = threadIdx.x;
-	if((n-i-1)!=i)	
-	{
+	if((n-i-1)!=i)	{
 		d_a[i]+=d_a[n-i-1];
 	}
 }

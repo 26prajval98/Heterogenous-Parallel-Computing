@@ -55,6 +55,10 @@ int main(){
 
 			return 0;
 		}
+		else{
+			printf("Not Supported :( \n");
+		}
+
 	}
 	return -1;
 }

@@ -15,6 +15,7 @@ int main()
 	scanf("%d",&n);
 	float *h_a;
 	h_a = (float *)malloc(sizeof(float)*n);
+	printf("Enter the values of the array: ");
 	for(i=0;i<n;i++)
 		scanf("%f",&h_a[i]);
 	float *d_a; 
@@ -27,8 +28,9 @@ int main()
 		add_vec<<<Block_size,threads_used>>>(d_a,i);         //4.Invoke kernel
 	}
 	float z;
-	cudaMemcpy(&z,&d_a[0],sizeof(float),cudaMemcpyDeviceToHost);  //5.Copy results from device to host 
+	cudaMemcpy(&z,&d_a[0],sizeof(float),cudaMemcpyDeviceToHost); //5.Copy results from device to host 
 	cudaFree(d_a);                                               //6.Free device memory
+	free(h_a);                         			     // free host memory
 	printf("The sum is : %f \n",z);                                               
 	return 0;
 }

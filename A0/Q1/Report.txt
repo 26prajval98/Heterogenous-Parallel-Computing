@@ -8,9 +8,9 @@
 
 3. Total number of threads = Number of blocks * Number of threads per block = 65535*512 = 33,553,920 threads.
 
-4.   
-
-5.
+4. When the necessity of threads is less than the maximum number of threads, the user may not instantiate all the threads in the GPU   
+ 
+5. 
 
 6. In computer architecture, shared graphics memory refers to a design where the graphics chip does not have its own dedicated memory, and instead shares the main system RAM with the CPU and other components.
    Shared memory in GPU :    

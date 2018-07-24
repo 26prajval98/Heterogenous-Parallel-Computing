@@ -5,6 +5,7 @@ By :
 
 1. Architecture : Pascal 
    Compute Capability : 6.1
+   Card Name: GeForce GTX 1060
 
 2. Block Dimensions: 
 	(i)   dimension 0 - 1024B

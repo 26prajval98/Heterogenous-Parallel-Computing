@@ -1,3 +1,6 @@
+// 16CO145  SUMUKHA PK
+// 16CO234  PRAJVAL M
+
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
 #include <stdio.h>

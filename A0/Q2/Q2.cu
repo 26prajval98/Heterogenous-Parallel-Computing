@@ -25,7 +25,8 @@ int main()
 		threads_used = i/2;                                 
 		add_vec<<<Block_size,threads_used>>>(d_a,i);         //4.Invoke kernel
 	}
-	cudaMemcpy(h_a,d_a,n*sizeof(float),cudaMemcpyDeviceToHost);  //5.Copy results from device to host 
+	int z;
+	cudaMemcpy(&z,&d_a[0],sizeof(float),cudaMemcpyDeviceToHost);  //5.Copy results from device to host 
 	cudaFree(d_a);                                               //6.Free device memory
 	printf("The sum is : %f \n",h_a[0]);                                               
 	return 0;

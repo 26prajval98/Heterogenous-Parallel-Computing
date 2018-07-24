@@ -58,7 +58,10 @@ int main(){
 		else{
 			printf("Not Supported :( \n");
 		}
-
+		
+	}
+	else{
+		printf("Nvidia GPU not not found");
 	}
 	return -1;
 }

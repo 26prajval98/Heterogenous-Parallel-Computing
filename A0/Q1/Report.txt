@@ -1,3 +1,8 @@
+By :
+
+16CO145     SUMUKHA PK
+16CO234     Prajval M
+
 1. Architecture : Pascal 
    Compute Capability : 6.1
 

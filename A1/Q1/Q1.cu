@@ -50,8 +50,9 @@ int main(){
         int blocks = d_itr / MAX_THREAD;
 
         if(blocks < MAX_BLOCK){
-            generate_in_cpu(h_A, h_itr);
-            generate_in_cpu(h_B, h_itr);
+            generate_in_cpu(h_A, h_itr);    // generating A array of random number with size > 16000   
+            generate_in_cpu(h_B, h_itr);    // generating B array of random number with size > 16000 
+
             cudaMemcpy( d_A, h_A, d_itr * sizeof(float), cudaMemcpyHostToDevice);
             cudaMemcpy( d_B, h_B, d_itr * sizeof(float), cudaMemcpyHostToDevice);
 

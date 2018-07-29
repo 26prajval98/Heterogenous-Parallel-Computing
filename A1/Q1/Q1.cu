@@ -66,7 +66,7 @@ int main(){
 
 
             for(int i = 0 ; i< h_itr; i++){
-                printf("%f %f %f\n",h_A[i], h_B[i], h_C[i]);
+                printf("A[%d] = %f  B[%d] = %f  C[%d] = %f\n", i, h_A[i], i, h_B[i], i, h_C[i]);
             }
         }
 	}

@@ -34,8 +34,9 @@ int main()
 	}
 	
 	dim3 DimBlock(16,16,1);
-	dim3 DimGrid(ceil(n/16),ceil(n/16),1);
-
+	dim3 DimGrid(ceil(a/16),ceil(b/16),1);
+	
+	float *d_m, *d_n, *d_s;
 	cudaMalloc((void**)&d_m,a*b*sizeof(float));
 	cudaMalloc((void**)&d_n,b*a*sizeof(float));
 	cudaMalloc((void**)&d_s,a*b*sizeof(float));

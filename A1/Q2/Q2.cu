@@ -1,4 +1,4 @@
-	#include<stdio.h>
+#include<stdio.h>
 #include<cuda.h>
 #include<math.h>
 __global__ void Matrix_Add(float *d_m, float *d_n, float *d_s, long long int a, long long int b)

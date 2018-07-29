@@ -1,0 +1,12 @@
+Q2. Perform Matrix Addition of two large integer matrices in CUDA. Answer the following questions.
+
+  We performed a matrix addition operation with Dimensions 25 X 225 and answered the following questions
+
+  1.   How many floating operations are being performed in the matrix addition kernel?
+  Ans: The number of floating point operations is one per every cell of the matrix , i.e 25*225 = 5625.
+  2.   How many global memory reads are being performed by your kernel?
+  Ans: The number of memory reads that occur is 2 per every cell as one thread working on a cell reads each cell from matrix A and matrix B.
+       So reads = 2*25*225 = 11250.
+  3.   How many global memory writes are being performed by your kernel?
+  Ans: The number of memory writes that occur is one per every cell as one threads stores the sum of the operation in the sum matrix.
+       So writes = 25*225 = 5625.

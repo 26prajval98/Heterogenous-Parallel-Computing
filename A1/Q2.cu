@@ -9,7 +9,7 @@ __global__ void Matrix_Add(float *d_m, float *d_n, float *d_s, long long int a, 
 	if(i<a)
 	{
 		if(j<b)
-			*(d_s + i*a + j) = *(d_m + i*a +j) + *(d_n + i*a + j);
+			*(d_s + i*b + j) = *(d_m + i*b +j) + *(d_n + i*b + j);
 	}
 	
 }
@@ -25,7 +25,7 @@ int main()
 	for(i=0;i<a;i++)
 	{
 		for(j=0;j<b;j++)
-			*(h_m + i*a +j) = ((float)rand());
+			*(h_m + i*b +j) = ((float)rand());
 	}
 	for(i=0;i<a;i++)
 	{
@@ -45,20 +45,32 @@ int main()
 	cudaMemcpy(d_n,h_n,b*a*sizeof(float),cudaMemcpyHostToDevice);
 	cudaMemcpy(d_s,h_s,a*b*sizeof(float),cudaMemcpyHostToDevice);
 	 
-	Matrix_Add<<<DimGrid,DimBlock>>(*d_m,*d_n,*d_s,a,b);
+	Matrix_Add<<<DimGrid,DimBlock>>>(d_m,d_n,d_s,a,b);
 	
 	cudaMemcpy(h_m,d_m,a*b*sizeof(float),cudaMemcpyDeviceToHost);
         cudaMemcpy(h_n,d_n,b*a*sizeof(float),cudaMemcpyDeviceToHost);
         cudaMemcpy(h_s,d_s,a*b*sizeof(float),cudaMemcpyDeviceToHost);
 	
-	cudaFree(d_m); cudaFree(d_n); cudaFree(d_s); 
-	
+	for(i=0;i<a;i++)
+        {
+                for(j=0;j<b;j++)
+                        printf("%f ",*(h_s + i*b + j));
+                printf("\n");
+        }printf("\n");
+        for(i=0;i<a;i++)
+        {
+                for(j=0;j<b;j++)
+                        printf("%f ",*(h_m + i*b + j));
+                printf("\n");
+        }printf("\n");
 	for(i=0;i<a;i++)
 	{
 		for(j=0;j<b;j++)
-			printf("%f ",*(h_s + i*a + j));
+			printf("%f ",*(h_n + i*b + j));
 		printf("\n");
 	}
+
+	cudaFree(d_m); cudaFree(d_n); cudaFree(d_s);
 	
 	free(h_m); free(h_n); free(h_s);
 	return 0;

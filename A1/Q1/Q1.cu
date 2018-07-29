@@ -1,17 +1,22 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <cuda.h>
+#include <math.h>
 
 __global__ void generate(float * A, int size, int num, int MAX_THREAD){
     int idx = threadIdx.x + blockDim.x * blockIdx.x;
-    if(idx < size)
-        A[idx] = num;
+    A[idx] = num;
+}
+
+void generate_in_cpu(float *A, int size){
+    for(int i = 0; i< size; i++){
+        A[i] = rand();
+    }
 }
 
 __global__ void sum(float * A, float * B, float * C, int size, int MAX_THREAD){
     int idx = threadIdx.x + blockDim.x * blockIdx.x;
-    if(idx < size)
-        C[idx] = A[idx] + B[idx];
+    C[idx] = A[idx] + B[idx];
 }
 
 int main(){
@@ -26,32 +31,41 @@ int main(){
 		#define MAX_THREAD devProp.maxThreadsDim[0]
         #define MAX_BLOCK devProp.maxGridSize[0]
 
-        int itr = rand() % (1024 - 0 + 1) + 1024;
-        
+        int h_itr = rand() % (16001) + 16000;
+        int d_itr = ceil((float)h_itr/MAX_THREAD) * MAX_THREAD;
+
         float * h_A, * h_B, * h_C;
         float * d_A, * d_B, * d_C;
 
-        h_A = (float *)malloc(itr * sizeof(float));
-        h_B = (float *)malloc(itr * sizeof(float));
-        h_C = (float *)malloc(itr * sizeof(float));
+        // printf("%d %d %d\n", h_itr, d_itr);
 
-        cudaMalloc((void **)&d_A, itr*sizeof(float));
-        cudaMalloc((void **)&d_B, itr*sizeof(float));
-        cudaMalloc((void **)&d_C, itr*sizeof(float));
+        h_A = (float *)malloc(h_itr * sizeof(float));
+        h_B = (float *)malloc(h_itr * sizeof(float));
+        h_C = (float *)malloc(h_itr * sizeof(float));
 
-        int blocks = itr / MAX_THREAD;
+        cudaMalloc((void **)&d_A, d_itr*sizeof(float));
+        cudaMalloc((void **)&d_B, d_itr*sizeof(float));
+        cudaMalloc((void **)&d_C, d_itr*sizeof(float));
+
+        int blocks = d_itr / MAX_THREAD;
 
         if(blocks < MAX_BLOCK){
-            generate<<<blocks, MAX_THREAD>>>(d_A, itr, rand(), MAX_THREAD);
-            generate<<<blocks, MAX_THREAD>>>(d_B, itr, rand(), MAX_THREAD);
-            sum<<<blocks, MAX_THREAD>>>(d_A, d_B, d_C, itr, MAX_THREAD);
+            generate_in_cpu(h_A, h_itr);
+            generate_in_cpu(h_B, h_itr);
+            cudaMemcpy( d_A, h_A, d_itr * sizeof(float), cudaMemcpyHostToDevice);
+            cudaMemcpy( d_B, h_B, d_itr * sizeof(float), cudaMemcpyHostToDevice);
 
-            cudaMemcpy( h_A, d_A, itr * sizeof(float), cudaMemcpyDeviceToHost);
-            cudaMemcpy( h_B, d_B, itr * sizeof(float), cudaMemcpyDeviceToHost);
-            cudaMemcpy( h_C, d_C, itr * sizeof(float), cudaMemcpyDeviceToHost);
+            // generate<<<blocks, MAX_THREAD>>>(d_A, d_itr, 1, MAX_THREAD);
+            // generate<<<blocks, MAX_THREAD>>>(d_B, d_itr, 3, MAX_THREAD);
+            
+            sum<<<blocks, MAX_THREAD>>>(d_A, d_B, d_C, d_itr, MAX_THREAD);
+
+            cudaMemcpy( h_A, d_A, h_itr * sizeof(float), cudaMemcpyDeviceToHost);
+            cudaMemcpy( h_B, d_B, h_itr * sizeof(float), cudaMemcpyDeviceToHost);
+            cudaMemcpy( h_C, d_C, h_itr * sizeof(float), cudaMemcpyDeviceToHost);
 
 
-            for(int i =0 ; i<itr; i++){
+            for(int i = 0 ; i< h_itr; i++){
                 printf("%f %f %f\n",h_A[i], h_B[i], h_C[i]);
             }
         }

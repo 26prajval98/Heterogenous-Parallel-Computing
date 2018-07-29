@@ -1,3 +1,6 @@
+// 16CO145 Sumukha PK
+// 16CO234 Prajval M
+
 #include<stdio.h>
 #include<cuda.h>
 #include<math.h>

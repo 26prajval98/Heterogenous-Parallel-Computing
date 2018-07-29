@@ -1,5 +1,11 @@
+By :
+
+16CO145     SUMUKHA PK
+16CO234     Prajval M
+
 1. Architecture : Pascal 
    Compute Capability : 6.1
+   Card Name: GeForce GTX 1060
 
 2. Block Dimensions: 
 	(i)   dimension 0 - 1024B
@@ -8,20 +14,18 @@
 
 3. Total number of threads = Number of blocks * Number of threads per block = 65535*512 = 33,553,920 threads.
 
-4. When the necessity of threads is less than the maximum number of threads, the user may not instantiate all the threads in the GPU   
- 
-5. 
+4. and 5. The conditions that prevent the Programmer from launching maximum number of threads because  each block is executed on one Streaming multiprocessor and they have finite shared and local memory which limits the user/programmer from launching the maximum number of threads.
 
 6. In computer architecture, shared graphics memory refers to a design where the graphics chip does not have its own dedicated memory, and instead shares the main system RAM with the CPU and other components.
-   Shared memory in GPU :    
+   Shared memory in GPU :   49152 B or 48 KB
 
 7. Global memory is the “main” memory of the GPU. It has global scope and lifetime of the allocating program
-   Global memory in GPU : 2147483648 B or 2048 MB or 2GB    
+   Global memory in GPU :   2147483648 B or 2048 MB or 2GB    
  
 8. Constant memory is accessible by all threads. Lifetime of application. It is fully cached, but limited. 
    Constant memory in GPU : 65536 B or 64KB 
 
 9. Warp size is the number of threads in a warp, which is a sub-division used in the hardware implementation to coalesce memory access and instruction dispatch.
-   Warp size in GPU : 32 threads
+   Warp size in GPU :       32 threads
 
 10. Yes. GPUs with compute capability of 1.3 or above support double precision standard.

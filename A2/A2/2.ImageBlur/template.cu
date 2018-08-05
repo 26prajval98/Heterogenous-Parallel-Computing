@@ -1,7 +1,8 @@
-
+#include<stdio.h>
+#include<cuda.h>
+#include"wb.h"
 #define BLUR_SIZE 5
 
-//@@ INSERT CODE HERE
 
 int main(int argc, char *argv[]) {
 

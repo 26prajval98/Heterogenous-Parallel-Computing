@@ -1,4 +1,4 @@
-
+#include<bits/stdc++.h>
 #define CHANNELS 3
 #define BLUR_SIZE 5
 

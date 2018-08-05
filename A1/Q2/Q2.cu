@@ -1,4 +1,7 @@
-	#include<stdio.h>
+// 16CO145 Sumukha PK
+// 16CO234 Prajval M
+
+#include<stdio.h>
 #include<cuda.h>
 #include<math.h>
 __global__ void Matrix_Add(float *d_m, float *d_n, float *d_s, long long int a, long long int b)

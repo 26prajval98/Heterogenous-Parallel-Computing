@@ -1,3 +1,6 @@
+// 16CO145 Sumukha PK
+// 16CO234 Prajval M
+
 Q2. Perform Matrix Addition of two large integer matrices in CUDA. Answer the following questions.
 
   We performed a matrix addition operation with Dimensions 25 X 225 and answered the following questions

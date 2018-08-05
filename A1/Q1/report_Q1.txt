@@ -1,0 +1,11 @@
+// 16CO145 Sumukha PK
+// 16CO234 Prajval M
+
+Addition of two large integers :
+
+1.  Generating 2 arrays A and B of size atleast 16000
+2.  Selecting number of threads and blocks for the addition to run on using ceiling on the size of A and B i.e threads required 
+    = ceiling(size(A)/threads_per_block) * threads_per_block
+3.  Generating arrays A and B randomly on CPU and copying to GPU memory
+4.  The 2 arrays on GPU and storing its value in C (another array)
+5   Copying everything back to CPU and printing out the values

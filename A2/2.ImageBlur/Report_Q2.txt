@@ -3,6 +3,10 @@ Submitted by
 SUMUKHA.PK (16CO145) 
 PRAJVAL.M (16CO234)
 
+
+running the file format : 
+.\a -e <any> -i <input_path> -o <any> -t image
+
 Question 2
 
 1.   How many floating operations are being performed in your color conversion kernel?

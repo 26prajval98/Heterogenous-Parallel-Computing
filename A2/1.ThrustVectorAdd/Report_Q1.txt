@@ -3,6 +3,9 @@ Submitted by
 SUMUKHA.PK (16CO145)
 PRAJVAL.M (16CO234)
 
+running the file format : 
+.\a o <output_path> i <input1_path> <input2_path>
+
 Question 1.
 
 1.   How many floating operations are being performed in your vector add kernel?

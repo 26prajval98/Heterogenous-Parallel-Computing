@@ -1,3 +1,6 @@
+// 16CO145 - Sumukha PK
+// 16CO234 - Prajval M
+
 #include <cuda.h>
 #include "wb.h"
 #include <cuda_runtime_api.h>

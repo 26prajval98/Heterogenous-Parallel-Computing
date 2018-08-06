@@ -1,3 +1,6 @@
+// 16CO145 - Sumukha PK
+// 16CO234 - Prajval M
+
 #include <thrust/device_vector.h>
 #include <thrust/host_vector.h>
 #include <thrust/functional.h>

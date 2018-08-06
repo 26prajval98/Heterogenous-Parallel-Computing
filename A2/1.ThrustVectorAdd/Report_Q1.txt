@@ -1,0 +1,17 @@
+Submitted by SUMUKHA.PK (16CO145) & PRAJVAL.M (16CO234)
+
+Question 1.
+
+1.   How many floating operations are being performed in your vector add kernel?
+Ans. Number of operations is the number of elements in the vector,i.e. 'n' operations for a vector of size 'n'.
+
+2.   How many global memory reads are being performed by your kernel?
+Ans. Global memory reads are 2 per floating opreations = 2*n for a vector of size 'n'.
+
+3.   How many global memory writes are being performed by your kernel?
+Ans. Global memory writes are one per floating point operation = 'n' for a vector of size 'n'.
+
+4.   In what ways did Thrust make developing a functional vector addition code easier or harder?
+Ans. Thrust allows the user to transform, sort, search, transform by key etc. transform can take a thord argument which is a function
+     and thrust has inbuilt trust::plus function for addition of 2 vectors and hence makes addition easy. Also host and device variables
+     can be directly assigned (without cudaMemcpy) hence making thrust very useful.

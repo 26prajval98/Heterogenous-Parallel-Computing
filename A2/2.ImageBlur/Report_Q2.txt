@@ -1,0 +1,22 @@
+Submitted by SUMUKHA.PK (16CO145) & PRAJVAL.M (16CO234)
+
+Question 2
+
+1.   How many floating operations are being performed in your color conversion kernel?
+Ans. If number of rows = x and number of columns = y, following are the operatons performed:
+	(i)  Sum of each row = x rows times, y addition operations = x*y operations
+	(ii) Division to obtain average of the row for each cell, this is one per row = y operations
+	So total = x*y + y operations.
+
+2.   How many global memory reads are being performed by your kernel?
+Ans. If number of rows = x and number of columns = y, following are the global memory reads performed:
+	(i)  To obtain sum of every row each element is read once,so x*y reads in total. 
+     So total reads = x*y.
+
+3.   How many global memory writes are being performed by your kernel?
+Ans. Each pixel is written once, so total writes = x*y where x and y are rows and columns respectively.
+ 
+4.   Describe what possible optimizations can be implemented to your kernel to achieve a performance speedup.
+Ans. Following can be used to speed up the computation:
+	(i)  Instead of performing the sum operation for every pixel under the valid window, perform the sum once for a window and use it for the subsequent pixels in that window.
+	(ii) Use shared memory to save a copy of the data that will be reused again like sum and pixel values.

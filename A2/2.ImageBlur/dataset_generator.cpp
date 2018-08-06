@@ -1,7 +1,7 @@
 #include<bits/stdc++.h>
 
 #define CHANNELS 3
-#define BLUR_SIZE 5
+#define BLUR_SIZE 3
 
 static char *base_dir;
 

@@ -8,12 +8,13 @@ __global__ void Matrix_Mul(long long int *d_m, long long int *d_n, long long int
 {
 	long long int i = blockIdx.y*blockDim.y + threadIdx.y;
 	long long int j = blockIdx.x*blockDim.x + threadIdx.x;
-	
-	if((i<a) && (j<b))
-	{
-        for(long long int k=0;k<b;k++)
-            *(d_p + b*i + j ) += (*(d_m + c*i + k))*(*(d_n +b*k +j )); 
-	}
+	long long int temp = 0;
+
+	for(long long int k=0; k<b; k++)
+		temp += d_m[i*b + k] * d_n[b*k + j]; 
+
+	d_p[i*b + j]  =  temp;
+
 }
 int main()
 {
@@ -35,8 +36,8 @@ int main()
 			*(h_n + i*c +j) = ((long long int)rand());
 	}
 	
-	dim3 DimGrid(ceil(a/16),ceil(c/16),1);
-	dim3 DimBlock(16,16,1);
+	// dim3 DimGrid(ceil(a),ceil(c),1);
+	dim3 DimBlock(a,c,1);
 	
 	long long int *d_m, *d_n, *d_p;
 	cudaMalloc((long long int**)&d_m,a*b*sizeof(long long int));
@@ -47,7 +48,7 @@ int main()
 	cudaMemcpy(d_n,h_n,b*c*sizeof(long long int),cudaMemcpyHostToDevice);
 	cudaMemcpy(d_p,h_p,a*c*sizeof(long long int),cudaMemcpyHostToDevice);
 	 
-	Matrix_Mul<<<DimGrid,DimBlock>>>(d_m,d_n,d_p,a,b,c);
+	Matrix_Mul<<<1,DimBlock>>>(d_m,d_n,d_p,a,b,c);
 	
 	cudaMemcpy(h_m,d_m,a*b*sizeof(long long int),cudaMemcpyDeviceToHost);
     cudaMemcpy(h_n,d_n,b*c*sizeof(long long int),cudaMemcpyDeviceToHost);

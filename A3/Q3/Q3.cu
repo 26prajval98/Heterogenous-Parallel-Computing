@@ -1,12 +1,13 @@
 // 16CO145 Sumukha PK
 // 16CO234 Prajval M
 
-#include <stdio.h>
+#include<stdio.h>
+#include<cuda_runtime_api.h>
 #include <cuda.h>
-#include <math.h>
+using namespace std;
 
 #define SIZE 4
-#define TILE_WIDTH 4
+#define TILE_WIDTH 2
 
 __global__ void Matrix_Mul(long long int *d_m, long long int *d_n, long long int *d_p, long long int a, long long int b, long long int c)
 {
@@ -24,22 +25,41 @@ __global__ void Matrix_Mul(long long int *d_m, long long int *d_n, long long int
 	long long int i = min(Col, a - 1);
 	long long int j = min(Row, c - 1);
 
-	for (long long int p = 0; p < c; p++)
+	for (long long int p = 0; p < b/TILE_WIDTH; p++)
 	{
-		ds_A[ty][tx] = d_m[Row * b + p * TILE_WIDTH + tx];
-		ds_B[ty][tx] = d_n[(p * TILE_WIDTH + ty) * c + Col];
+		ds_A[ty][tx] = d_m[j * b + p * TILE_WIDTH + tx];
+		ds_B[ty][tx] = d_n[(p * TILE_WIDTH + ty) * c + i];
 		__syncthreads();
 
 		for (long long int k = 0; k < TILE_WIDTH; k++)
-		{
-			temp += ds_A[ty][i] * ds_B[i][tx];
-			__syncthreads();
-		}
+			temp += ds_A[ty][k] * ds_B[k][tx];
+		__syncthreads();
 
-		d_p[Row * c + Col] = temp;
+		d_p[j * c + i] = temp;
 	}
 }
-
+void MatMul(long long int *m,long long int *n,long long int *p, long long int a,long long int b,long long int c)
+{
+	long long int i,j,k,f=0,sum;
+	for(i=0;i<a;i++)
+	{
+		for(j=0;j<b;j++)
+		{
+			sum=0;
+			for(k=0;k<c;k++)
+				sum+=m[i*b+k]*n[k*c+j];
+			if(sum!=p[i*b+j])
+				{
+					f=1;
+					break;
+				}
+		}
+	}
+	if(f==1)
+		printf("Error");
+	else
+		printf("WORKED!");
+}
 int main()
 {
 	long long int a, b, c, i, j;
@@ -106,7 +126,7 @@ int main()
 			printf("%lld ", h_n[i * c + j]);
 		printf("\n");
 	}
-
+	MatMul(h_m,h_n,h_p,a,b,c);
 	cudaFree(d_m);
 	cudaFree(d_n);
 	cudaFree(d_p);

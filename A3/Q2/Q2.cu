@@ -20,9 +20,32 @@ __global__ void Matrix_Mul(long long int *d_m, long long int *d_n, long long int
 		temp += d_m[i*b + k] * d_n[k*c + j]; 
 	}
 
-	d_p[i*c + j]  =  temp;
-
 	__syncthreads();
+
+	d_p[i*c + j]  =  temp;
+}
+
+void MatMul(long long int *m,long long int *n,long long int *p, long long int a,long long int b,long long int c)
+{
+	long long int i,j,k,f=0,sum;
+	for(i=0;i<a;i++)
+	{
+		for(j=0;j<b;j++)
+		{
+			sum=0;
+			for(k=0;k<c;k++)
+				sum+=m[i*b+k]*n[k*c+j];
+			if(sum!=p[i*b+j])
+				{
+					f=1;
+					break;
+				}
+		}
+	}
+	if(f==1)
+		printf("Error");
+	else
+		printf("WORKED!");
 }
 
 int main()
@@ -90,7 +113,7 @@ int main()
 			printf("%lld ", h_n[i*c + j]);
 		printf("\n");
 	}
-
+	MatMul(h_m,h_n,h_p,a,b,c);
 	cudaFree(d_m); cudaFree(d_n); cudaFree(d_p);
 	
 	free(h_m); free(h_n); free(h_p);

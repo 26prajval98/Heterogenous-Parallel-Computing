@@ -1,88 +1,120 @@
+// 16CO145 - Sumukha PK
+// 16CO234 - Prajval M
 
+#include <cuda.h>
+#include "wb.h"
+#include <cuda_runtime_api.h> //@@ define error checking macro here.
 
-//@@ define error checking macro here.
-#define errCheck(stmt)                                                     \
-  do {                                                                    \
-    cudaError_t err = stmt;                                               \
-    if (err != cudaSuccess) {                                             \
-      printErrorLog(ERROR, "Failed to run stmt ", #stmt);                         \
-      printErrorLog(ERROR, "Got CUDA error ...  ", cudaGetErrorString(err));      \
-      return -1;                                                          \
-    }                                                                     \
-  } while (0)
+#define SIZE 16
+
+__global__ 
+void cvt(float *ipt, float *opt, int h, int w)
+{
+	int i = blockIdx.x * blockDim.x + threadIdx.x;
+	int j = blockIdx.y * blockDim.y + threadIdx.y;
+
+	i = min(i, w);
+	j = min(j, h);
+
+	unsigned int idx = i * w + j;
+	unsigned int r = ipt[idx], g = ipt[idx + 1], b = ipt[idx + 2];
+
+	opt[idx] = (0.21 * r + 0.71 * g + 0.07 * b);
+
+	__syncthreads();
+}
+
+#define errCheck(stmt)                                                             \
+	do                                                                             \
+	{                                                                              \
+		cudaError_t err = stmt;                                                    \
+		if (err != cudaSuccess)                                                    \
+		{                                                                          \
+			printErrorLog(ERROR, "Failed to run stmt ", #stmt);                    \
+			printErrorLog(ERROR, "Got CUDA error ...  ", cudaGetErrorString(err)); \
+			return -1;                                                             \
+		}                                                                          \
+	} while (0)
 
 //@@ INSERT CODE HERE
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
 
-  int imageChannels;
-  int imageWidth;
-  int imageHeight;
-  char *inputImageFile;
-  wbImage_t inputImage;
-  wbImage_t outputImage;
-  float *hostInputImageData;
-  float *hostOutputImageData;
-  float *deviceInputImageData;
-  float *deviceOutputImageData;
+	int imageChannels;
+	int imageWidth;
+	int imageHeight;
+	char *inputImageFile;
+	wbImage_t inputImage;
+	wbImage_t outputImage;
+	float *hostInputImageData;
+	float *hostOutputImageData;
+	float *deviceInputImageData;
+	float *deviceOutputImageData;
 
-  /* parse the input arguments */
-  //@@ Insert code here
+	/* parse the input arguments */
+	//@@ Insert code here
 
-  args = 
+	wbArg_t args = {argc, argv};
 
-  inputImageFile = wbArg_getInputFile(args, 0);
+	inputImageFile = wbArg_getInputFile(args, 3);
 
-  inputImage = wbImport(inputImageFile);
+	inputImage = wbImport(inputImageFile);
 
-  imageWidth  = wbImage_getWidth(inputImage);
-  imageHeight = wbImage_getHeight(inputImage);
-  // For this lab the value is always 3
-  imageChannels = wbImage_getChannels(inputImage);
+	imageWidth = wbImage_getWidth(inputImage);
+	imageHeight = wbImage_getHeight(inputImage);
+	// For this lab the value is always 3
+	imageChannels = wbImage_getChannels(inputImage);
 
-  // Since the image is monochromatic, it only contains one channel
-  outputImage = wbImage_new(imageWidth, imageHeight, 1);
+	// Since the image is monochromatic, it only contains one channel
+	outputImage = wbImage_new(imageWidth, imageHeight, 1);
 
-  hostInputImageData  = wbImage_getData(inputImage);
-  hostOutputImageData = wbImage_getData(outputImage);
+	hostInputImageData = wbImage_getData(inputImage);
+	hostOutputImageData = wbImage_getData(outputImage);
 
-  wbTime_start(GPU, "Doing GPU Computation (memory + compute)");
+	wbTime_start(GPU, "Doing GPU Computation (memory + compute)");
 
-  wbTime_start(GPU, "Doing GPU memory allocation");
-  cudaMalloc((void **)&deviceInputImageData,
-             imageWidth * imageHeight * imageChannels * sizeof(float));
-  cudaMalloc((void **)&deviceOutputImageData,
-             imageWidth * imageHeight * sizeof(float));
-  wbTime_stop(GPU, "Doing GPU memory allocation");
+	wbTime_start(GPU, "Doing GPU memory allocation");
+	cudaMalloc((void **)&deviceInputImageData,
+			   imageWidth * imageHeight * imageChannels * sizeof(float));
+	cudaMalloc((void **)&deviceOutputImageData,
+			   imageWidth * imageHeight * sizeof(float));
+	wbTime_stop(GPU, "Doing GPU memory allocation");
 
-  wbTime_start(Copy, "Copying data to the GPU");
-  cudaMemcpy(deviceInputImageData, hostInputImageData,
-             imageWidth * imageHeight * imageChannels * sizeof(float),
-             cudaMemcpyHostToDevice);
-  wbTime_stop(Copy, "Copying data to the GPU");
+	wbTime_start(Copy, "Copying data to the GPU");
+	cudaMemcpy(deviceInputImageData, hostInputImageData,
+			   imageWidth * imageHeight * imageChannels * sizeof(float),
+			   cudaMemcpyHostToDevice);
+	wbTime_stop(Copy, "Copying data to the GPU");
 
-  ///////////////////////////////////////////////////////
-  wbTime_start(Compute, "Doing the computation on the GPU");
-  //@@ INSERT CODE HERE
+	///////////////////////////////////////////////////////
+	wbTime_start(Compute, "Doing the computation on the GPU");
+	
+	int k_w = imageWidth > SIZE ? ceil(imageWidth/SIZE) : 1, k_h = imageHeight > SIZE ? ceil(imageHeight/SIZE) : 1;
 
-  wbTime_stop(Compute, "Doing the computation on the GPU");
+	dim3 DimGrid(k_w, k_h);
+	dim3 DimBlock(SIZE, SIZE);
 
-  ///////////////////////////////////////////////////////
-  wbTime_start(Copy, "Copying data from the GPU");
-  cudaMemcpy(hostOutputImageData, deviceOutputImageData,
-             imageWidth * imageHeight * sizeof(float),
-             cudaMemcpyDeviceToHost);
-  wbTime_stop(Copy, "Copying data from the GPU");
+	cvt<<<DimGrid,DimBlock>>>(deviceInputImageData, deviceOutputImageData, imageHeight, imageWidth);
+	
+	wbTime_stop(Compute, "Doing the computation on the GPU");
 
-  wbTime_stop(GPU, "Doing GPU Computation (memory + compute)");
+	///////////////////////////////////////////////////////
+	wbTime_start(Copy, "Copying data from the GPU");
+	cudaMemcpy(hostOutputImageData, deviceOutputImageData,
+			   imageWidth * imageHeight * sizeof(float),
+			   cudaMemcpyDeviceToHost);
+	wbTime_stop(Copy, "Copying data from the GPU");
 
-  wbSolution(args, outputImage);
+	wbTime_stop(GPU, "Doing GPU Computation (memory + compute)");
 
-  cudaFree(deviceInputImageData);
-  cudaFree(deviceOutputImageData);
+	wbSolution(args, outputImage);
 
-  wbImage_delete(outputImage);
-  wbImage_delete(inputImage);
+	cudaFree(deviceInputImageData);
+	cudaFree(deviceOutputImageData);
 
-  return 0;
+	wbImage_delete(outputImage);
+	wbImage_delete(inputImage);
+
+	return 0;
 }

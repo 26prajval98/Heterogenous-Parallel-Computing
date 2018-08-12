@@ -316,7 +316,7 @@ struct wbImage_t
 wbImage_t wbImport(const char *inputFile)
 {
 	wbImage_t image;
-	image._imageChannels = 3;
+	image._imageChannels = 1;
 
 	std::ifstream fileInput;
 	fileInput.open(inputFile, std::ios::binary);
@@ -324,11 +324,7 @@ wbImage_t wbImport(const char *inputFile)
 	{
 		char magic[2];
 		fileInput.read(magic, 2);
-		if (magic[0] != 'P' || magic[1] != '6')
-		{
-			std::cout << "expected 'P6' but got " << magic[0] << magic[1] << std::endl;
-			exit(1);
-		}
+
 		char tmp = fileInput.peek();
 		while (isspace(tmp))
 		{
@@ -496,8 +492,8 @@ void wbSolution(wbArg_t arg, wbImage_t image)
 	int channels = 1;
 	for (int i = 0; i < image._imageWidth; ++i)
 		for (int j = 0; j < image._imageHeight; ++j)
-			for (int k = 0; k < 3; ++k)
 			{
+				int k = 0;
 				int index = (j * image._imageWidth + i) * channels + k;
 
 				double scaled = ((double)image._data[index]) * 255.0f;

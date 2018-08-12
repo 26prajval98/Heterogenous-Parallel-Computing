@@ -6,23 +6,39 @@
 #include<math.h>
 
 #define SIZE 4
- 
+#define TILE_WIDTH 4
+
 __global__ void Matrix_Mul(long long int *d_m, long long int *d_n, long long int *d_p, long long int a, long long int b,long long int c)
 {
-	long long int oj = blockIdx.y*blockDim.y + threadIdx.y;
-	long long int oi = blockIdx.x*blockDim.x + threadIdx.x;
+    long long int bx = blockIdx.x; 
+    long long int by = blockIdx.y;
+    long long int tx = threadIdx.x; 
+    long long int ty = threadIdx.y;
+    long long int Row = by * blockDim.y + ty;
+    long long int Col = bx * blockDim.x + tx;
 	long long int temp = 0;
 
-	long long int i = min(oi, a-1);
-	long long int j = min(oj, c-1);
+    __shared__ long long int ds_A[TILE_WIDTH][TILE_WIDTH];
+    __shared__ long long int ds_B[TILE_WIDTH][TILE_WIDTH];
+    
+	long long int i = min(Col, a-1);
+	long long int j = min(Row, c-1);
 
-	for(long long int k=0; k<b; k++){
-		temp += d_m[i*b + k] * d_n[k*c + j]; 
-	}
+    for(long long int p=0;p<k;p++)
+    {
+        ds_A[ty][tx] = A[Row*n + t*TILE_WIDTH+tx];
+        ds_B[ty][tx] = B[(t*TILE_WIDTH+ty)*k + Col];
+        __syncthreads();
 
-	d_p[i*c + j]  =  temp;
-
-	__syncthreads();
+        for(long long int k=0; k<TILE_WIDTH; k++)
+        {
+            temp += ds_A[ty][i] * ds_B[i][tx];
+            __syncthreads();
+        }
+    
+        d_p[Row*k + Col]  =  temp;
+    }
+	
 }
 
 int main()

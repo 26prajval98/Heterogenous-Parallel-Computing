@@ -20,8 +20,6 @@ void cvt(float *ipt, float *opt, int h, int w)
 	unsigned int r = ipt[idx], g = ipt[idx + 1], b = ipt[idx + 2];
 
 	opt[idx] = (0.21 * r + 0.71 * g + 0.07 * b);
-
-	__syncthreads();
 }
 
 #define errCheck(stmt)                                                             \

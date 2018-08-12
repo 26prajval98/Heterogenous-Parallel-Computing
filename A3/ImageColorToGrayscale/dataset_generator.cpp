@@ -1,5 +1,6 @@
 #include "wb.h"
 
+using namespace std;
 #define CHANNELS 3
 
 static char *base_dir;

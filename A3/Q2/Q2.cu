@@ -5,7 +5,7 @@
 #include<cuda.h>
 #include<math.h>
 
-#define SIZE 4
+#define SIZE 8
  
 __global__ void Matrix_Mul(long long int *d_m, long long int *d_n, long long int *d_p, long long int a, long long int b,long long int c)
 {

@@ -6,38 +6,58 @@
 #include <cuda.h>
 using namespace std;
 
-#define SIZE 64
-#define TILE_WIDTH 32
+#define SIZE 32
+
 
 __global__ void Matrix_Mul(long long int *d_m, long long int *d_n, long long int *d_p, long long int a, long long int b, long long int c)
 {
-	long long int bx = blockIdx.x;
-	long long int by = blockIdx.y;
-	long long int tx = threadIdx.x;
-	long long int ty = threadIdx.y;
-	long long int Row = by * blockDim.y + ty;
-	long long int Col = bx * blockDim.x + tx;
-	long long int temp = 0;
-
-	__shared__ long long int ds_A[TILE_WIDTH][TILE_WIDTH];
-	__shared__ long long int ds_B[TILE_WIDTH][TILE_WIDTH];
-
-	long long int i = min(Col, a - 1);
-	long long int j = min(Row, c - 1);
-
-	for (long long int p = 0; p < b/TILE_WIDTH; p++)
+	if(a<SIZE || c<SIZE )   													//If tiling is not necessary use older method 
 	{
-		ds_A[ty][tx] = d_m[j * b + p * TILE_WIDTH + tx];
-		ds_B[ty][tx] = d_n[(p * TILE_WIDTH + ty) * c + i];
-		__syncthreads();
-		long long int f=TILE_WIDTH;
-		if(p<TILE_WIDTH)
-			f=p;
-		for (long long int k = 0; k < f; k++)
-			temp += ds_A[ty][k] * ds_B[k][tx];
+		long long int oj = blockIdx.y*blockDim.y + threadIdx.y;
+		long long int oi = blockIdx.x*blockDim.x + threadIdx.x;
+		long long int temp = 0;
+
+		long long int i = min(oi, a-1);
+		long long int j = min(oj, c-1);
+
+		for(long long int k=0; k<b; k++)
+		{
+			temp += d_m[i*b + k] * d_n[k*c + j]; 
+		}
+
 		__syncthreads();
 
-		d_p[j * c + i] = temp;
+		d_p[i*c + j]  =  temp;
+	}
+	else
+	{
+		
+		long long int bx = blockIdx.x;
+		long long int by = blockIdx.y;
+		long long int tx = threadIdx.x;
+		long long int ty = threadIdx.y;
+		long long int Row = by * blockDim.y + ty;
+		long long int Col = bx * blockDim.x + tx;
+		long long int temp = 0;
+
+		__shared__ long long int ds_A[SIZE][SIZE];
+		__shared__ long long int ds_B[SIZE][SIZE];
+
+		long long int i = min(Row, a - 1);
+		long long int j = min(Col, c - 1);
+
+		for (long long int p = 0; p < b/SIZE; p++)
+		{
+		ds_A[ty][tx] = d_m[i * b + p * SIZE + tx];
+		ds_B[ty][tx] = d_n[(p * SIZE + ty) * c + j];
+		__syncthreads();
+
+		for (long long int k = 0; k < SIZE; k++)
+		temp += ds_A[ty][k] * ds_B[k][tx];
+		__syncthreads();
+
+		d_p[i * c + j] = temp;
+		}
 	}
 }
 void MatMul(long long int *m,long long int *n,long long int *p, long long int a,long long int b,long long int c)

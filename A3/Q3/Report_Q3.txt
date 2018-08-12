@@ -1,0 +1,34 @@
+Submitted by 
+
+SUMUKHA.PK (16CO145)
+PRAJVAL.M (16CO234)
+
+Q3. Tiled matrix multiplication
+
+Let us consider matrices of size aXb and bXc 
+
+1.   How many floating operations are being performed in your matrix multiply kernel? explain.
+Ans. For above matrices, there are 2*a*b*c operations performed(half each for add and multiply).
+
+2.   How many global memory reads are being performed by your kernel? explain.
+Ans. Gloabal memory reads are cut down by the SIZE of the dimension of the block of threads. That is, if the block size is S, and reads 
+     for normal matrix multiplication is a*b*c, new number of reads will be (a*b*c)/S;
+
+3.   How many global memory writes are being performed by your kernel? explain.
+Ans. The global memory writes occur when the addition operation occurs, so a*b*c writes.
+
+4.   Describe what further optimizations can be implemented to your kernel to achieve a performance speedup.
+Ans. 
+
+5.    Compare the implementation difficulty of this kernel compared to the previous MP. What difficulties did you
+      have with this implementation?
+Ans.  The major difficulty is to manage the tiling,i.e to ensure that data that needs to be cached must not be  greater than the size 
+      of shared memory. Also, using appropriate size of tiles is a major issue.
+
+6.   Suppose you have matrices with dimensions bigger than the max thread dimensions. Sketch an algorithm that
+     would perform matrix multiplication algorithm that would perform the multiplication in this case.
+Ans. 
+
+7.   Suppose you have matrices that would not fit in global memory. Sketch an algorithm that would perform matrix
+     multiplication algorithm that would perform the multiplication out of place.
+Ans. 

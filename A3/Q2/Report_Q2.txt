@@ -1,0 +1,20 @@
+Submitted by 
+
+SUMUKHA.PK (16CO145)
+PRAJVAL.M (16CO234)
+
+Q2. Perform Matrix Multiplication of two large integer matrices in CUDA. Answer the following questions.
+
+Let us consider matrices of size aXb and bXc 
+
+1.   How many integer operations are being performed in your matrix multiply kernel?
+Ans. For above matrices, there are 2*a*b*c operations performed(half each for add and multiply). 
+
+2.   How many global memory reads are being performed by your kernel?
+Ans. The global memory read occurs for every multiplication operation, so a*b*c reads.
+
+3.   How many global memory writes are being performed by your kernel?
+Ans. The global memory writes occur when the addition operation occurs, so a*b*c writes.
+
+4.   Describe what possible optimizations can be implemented to your kernel to achieve a performance speedup.
+Ans. Possible optimizations include using shared memory to bring the data that will be operated on by the threads all a once so that read operations can be reduced.

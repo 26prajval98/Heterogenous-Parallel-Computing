@@ -106,13 +106,13 @@ int main(int argc, char *argv[])
 	
 	hostOutputImageData[0] = checkImageData[0];
 
-	for(int i=0; i <imageWidth*imageHeight; i++){
-		std :: cout << i << " " << hostOutputImageData[i]*256 << " " << checkImageData[i]*256<< " " << (float) hostInputImageData[i*3 -2] *256 << " " << (float)  hostInputImageData[i*3 -1] *256<< " " << (float)hostInputImageData[i*3] *256<< std :: endl;
-		if(abs(hostOutputImageData[i]*256 - checkImageData[i]*256) > 6){
-			std :: cout << hostOutputImageData[i]*256 << " " << checkImageData[i]*256<< " " << (float) hostInputImageData[i*3 -2] *256 << " " << (float)  hostInputImageData[i*3 -1] *256<< " " << (float)hostInputImageData[i*3] *256<< std :: endl;
-			break;
-		}
-	}
+	// for(int i=0; i <imageWidth*imageHeight; i++){
+	// 	//std :: cout << i << " " << hostOutputImageData[i]*256 << " " << checkImageData[i]*256<< " " << (float) hostInputImageData[i*3 -2] *256 << " " << (float)  hostInputImageData[i*3 -1] *256<< " " << (float)hostInputImageData[i*3] *256<< std :: endl;
+	// 	if(abs(hostOutputImageData[i]*256 - checkImageData[i]*256) > 6){
+	// 		//std :: cout << hostOutputImageData[i]*256 << " " << checkImageData[i]*256<< " " << (float) hostInputImageData[i*3 -2] *256 << " " << (float)  hostInputImageData[i*3 -1] *256<< " " << (float)hostInputImageData[i*3] *256<< std :: endl;
+	// 		break;
+	// 	}
+	// }
 
 	wbTime_stop(Copy, "Copying data from the GPU");
 

@@ -27,8 +27,9 @@ Ans.  The major difficulty is to manage the tiling,i.e to ensure that data that 
 
 6.   Suppose you have matrices with dimensions bigger than the max thread dimensions. Sketch an algorithm that
      would perform matrix multiplication algorithm that would perform the multiplication in this case.
-Ans. 
+Ans. The matrix will be split into many blocks of threads so that each block can work independently with the max amount of threads 
+      available and then move to the next block.
 
 7.   Suppose you have matrices that would not fit in global memory. Sketch an algorithm that would perform matrix
      multiplication algorithm that would perform the multiplication out of place.
-Ans. 
+Ans. Parts of the matrix must be brought in to perform the sasme operation in a sophisticated manner. 

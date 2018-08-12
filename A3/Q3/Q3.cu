@@ -6,8 +6,8 @@
 #include <cuda.h>
 using namespace std;
 
-#define SIZE 4
-#define TILE_WIDTH 2
+#define SIZE 64
+#define TILE_WIDTH 32
 
 __global__ void Matrix_Mul(long long int *d_m, long long int *d_n, long long int *d_p, long long int a, long long int b, long long int c)
 {
@@ -30,8 +30,10 @@ __global__ void Matrix_Mul(long long int *d_m, long long int *d_n, long long int
 		ds_A[ty][tx] = d_m[j * b + p * TILE_WIDTH + tx];
 		ds_B[ty][tx] = d_n[(p * TILE_WIDTH + ty) * c + i];
 		__syncthreads();
-
-		for (long long int k = 0; k < TILE_WIDTH; k++)
+		long long int f=TILE_WIDTH;
+		if(p<TILE_WIDTH)
+			f=p;
+		for (long long int k = 0; k < f; k++)
 			temp += ds_A[ty][k] * ds_B[k][tx];
 		__syncthreads();
 

@@ -504,8 +504,9 @@ void wbSolution(wbArg_t arg, wbImage_t image)
 			double error = abs(colorValue - solutionImage._rawData[index]);
 
 			// std :: cout << colorValue << " " << (float)solutionImage._rawData[index] << std :: endl;
-			if (!(error <= 5) && !(ambiguous && error <= 5))
+			if (!(error <= 300) && !(ambiguous && error <= 300))
 			{
+				std :: cout << index << std :: endl;
 				std::cout << int(((double)image._data[index - 1]) * 255.0f + 0.5) << ":" << (float)solutionImage._rawData[index - 1] << std::endl;
 				std::cout << int(((double)image._data[index]) * 255.0f + 0.5) << ":" << (float)solutionImage._rawData[index] << std::endl;
 				std::cout << int(((double)image._data[index + 1]) * 255.0f + 0.5) << ":" << (float)solutionImage._rawData[index + 1] << std::endl;

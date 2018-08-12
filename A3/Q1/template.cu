@@ -128,6 +128,9 @@ int main(int argc, char *argv[])
 
 	hostOutputImageData[0] = checkImageData[0];
 
+	for(int i = 240; i < 250; i++)
+		std::cout << hostOutputImageData[i] << " " << checkImageData[i] <<std::endl;
+
 	wbTime_stop(Copy, "Copying data from the GPU");
 
 	wbTime_stop(GPU, "Doing GPU Computation (memory + compute)");

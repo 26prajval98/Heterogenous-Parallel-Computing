@@ -5,21 +5,21 @@
 #include "wb.h"
 #include <cuda_runtime_api.h> //@@ define error checking macro here.
 
-#define SIZE 16
+#define SIZE 4
 
 __global__ 
 void cvt(float *ipt, float *opt, int h, int w)
 {
-	int i = blockIdx.x * blockDim.x + threadIdx.x;
-	int j = blockIdx.y * blockDim.y + threadIdx.y;
+	int j = blockIdx.x * blockDim.x + threadIdx.x;
+	int i = blockIdx.y * blockDim.y + threadIdx.y;
 
-	i = min(i, w);
-	j = min(j, h);
+	i = min(i, w-1);
+	j = min(j, h-1);
 
-	unsigned int idx = i * w + j;
-	unsigned int r = ipt[idx], g = ipt[idx + 1], b = ipt[idx + 2];
+	unsigned int idx = 3*(i * w + j);
+	double r = ipt[idx], g = ipt[idx + 1], b = ipt[idx + 2];
 
-	opt[idx] = (0.21 * r + 0.71 * g + 0.07 * b);
+	opt[idx/3] = (0.21 * r + 0.71 * g + 0.07 * b);
 
 	__syncthreads();
 
@@ -105,6 +105,17 @@ int main(int argc, char *argv[])
 	cudaMemcpy(hostOutputImageData, deviceOutputImageData,
 			   imageWidth * imageHeight * sizeof(float),
 			   cudaMemcpyDeviceToHost);
+
+	// Custom checking
+	// for(int i=0; i<9; i+=3){
+	// 	if(abs(hostOutputImageData[i/3] - (0.21 * hostInputImageData[i] + 0.71 *hostInputImageData[i+1] + 0.07 * hostInputImageData[i+2] )) > 0.00001){
+	// 		std::cout << " Wrong " << std::endl;
+	// 		std::cout << hostOutputImageData[i/3] << ' ' << (0.21 * hostInputImageData[i] + 0.71 *hostInputImageData[i+1] + 0.07 * hostInputImageData[i+2] ) << std::endl;
+	// 		break;
+	// 	}
+	// }
+	// std::cout << " Correct " << std::endl;
+
 	wbTime_stop(Copy, "Copying data from the GPU");
 
 	wbTime_stop(GPU, "Doing GPU Computation (memory + compute)");

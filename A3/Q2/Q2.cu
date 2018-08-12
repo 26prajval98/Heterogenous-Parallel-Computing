@@ -5,25 +5,26 @@
 #include<cuda.h>
 #include<math.h>
 
-# define SIZE 16 
+#define SIZE 4
  
 __global__ void Matrix_Mul(long long int *d_m, long long int *d_n, long long int *d_p, long long int a, long long int b,long long int c)
 {
-	long long int oi = blockIdx.y*blockDim.y + threadIdx.y;
-	long long int oj = blockIdx.x*blockDim.x + threadIdx.x;
+	long long int oj = blockIdx.y*blockDim.y + threadIdx.y;
+	long long int oi = blockIdx.x*blockDim.x + threadIdx.x;
 	long long int temp = 0;
 
 	long long int i = min(oi, a-1);
 	long long int j = min(oj, c-1);
 
 	for(long long int k=0; k<b; k++){
-		temp += d_m[i*b + k] * d_n[b*k + j]; 
+		temp += d_m[i*b + k] * d_n[k*c + j]; 
 	}
 
 	d_p[i*c + j]  =  temp;
+
 	__syncthreads();
-	
 }
+
 int main()
 {
 	long long int a,b,c,i,j;
@@ -46,8 +47,10 @@ int main()
 		for(j=0;j<c;j++)
 			h_n[i*c + j] = ((long long int)rand());
 	}
-	
-	dim3 DimGrid((ceil(a)/SIZE),(ceil(c)/SIZE),1);
+	long long int c_a = a > SIZE ? (long long int)ceil(a/(float)SIZE) : 1;
+	long long int c_c = c > SIZE ? (long long int)ceil(c/(float)SIZE) : 1;
+
+	dim3 DimGrid(c_a, c_c, 1);
 	dim3 DimBlock(SIZE,SIZE,1);
 	
 	long long int *d_m, *d_n, *d_p;
@@ -59,7 +62,7 @@ int main()
 	cudaMemcpy(d_n,h_n,b*c*sizeof(long long int),cudaMemcpyHostToDevice);
 	cudaMemcpy(d_p,h_p,a*c*sizeof(long long int),cudaMemcpyHostToDevice);
 	 
-	Matrix_Mul<<<1,DimBlock>>>(d_m,d_n,d_p,a,b,c);
+	Matrix_Mul<<<DimGrid, DimBlock>>>(d_m,d_n,d_p,a,b,c);
 		
 	cudaMemcpy(h_m,d_m,a*b*sizeof(long long int),cudaMemcpyDeviceToHost);
     cudaMemcpy(h_n,d_n,b*c*sizeof(long long int),cudaMemcpyDeviceToHost);

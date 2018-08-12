@@ -38,17 +38,19 @@ int main()
 	dim3 DimGrid(ceil(a/16),ceil(c/16),1);
 	dim3 DimBlock(16,16,1);
 	
+	printf("rrg");	
 	long long int *d_m, *d_n, *d_p;
 	cudaMalloc((long long int**)&d_m,a*b*sizeof(long long int));
 	cudaMalloc((long long int**)&d_n,b*c*sizeof(long long int));
-	cudaMalloc((long long int**)&d_s,a*c*sizeof(long long int));
+	cudaMalloc((long long int**)&d_p,a*c*sizeof(long long int));
 
 	cudaMemcpy(d_m,h_m,a*b*sizeof(long long int),cudaMemcpyHostToDevice);
 	cudaMemcpy(d_n,h_n,b*c*sizeof(long long int),cudaMemcpyHostToDevice);
 	cudaMemcpy(d_p,h_p,a*c*sizeof(long long int),cudaMemcpyHostToDevice);
 	 
-	Matrix_Add<<<DimGrid,DimBlock>>>(d_m,d_n,d_s,a,b,c);
+	Matrix_Mul<<<DimGrid,DimBlock>>>(d_m,d_n,d_p,a,b,c);
 	
+	printf("EF");
 	cudaMemcpy(h_m,d_m,a*b*sizeof(long long int),cudaMemcpyDeviceToHost);
     cudaMemcpy(h_n,d_n,b*c*sizeof(long long int),cudaMemcpyDeviceToHost);
     cudaMemcpy(h_p,d_p,a*c*sizeof(long long int),cudaMemcpyDeviceToHost);
@@ -74,8 +76,8 @@ int main()
 		printf("\n");
 	}
 
-	cudaFree(d_m); cudaFree(d_n); cudaFree(d_s);
+	cudaFree(d_m); cudaFree(d_n); cudaFree(d_p);
 	
-	free(h_m); free(h_n); free(h_s);
+	free(h_m); free(h_n); free(h_p);
 	return 0;
 }

@@ -500,7 +500,6 @@ void wbSolution(wbArg_t arg, wbImage_t image)
                 bool ambiguous = fabs(decimalPart - 0.5) < 0.0001;
 
                 int colorValue = int(((double)image._data[index]) * 255.0f + 0.5);
-                std::cout <<" Fucking " << (float)solutionImage._rawData[index] <<" " << colorValue << std::endl;
                 double error = abs(colorValue - solutionImage._rawData[index]);
                 if (!(error <= 10) && !(ambiguous && error <= 100))
                 {

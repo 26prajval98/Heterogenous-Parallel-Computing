@@ -1,4 +1,4 @@
-#include "wb.h"
+#include <bits/stdc++.h>
 
 using namespace std;
 #define CHANNELS 3

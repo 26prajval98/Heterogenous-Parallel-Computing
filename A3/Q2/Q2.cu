@@ -38,7 +38,6 @@ int main()
 	dim3 DimGrid(ceil(a/16),ceil(c/16),1);
 	dim3 DimBlock(16,16,1);
 	
-	printf("rrg");	
 	long long int *d_m, *d_n, *d_p;
 	cudaMalloc((long long int**)&d_m,a*b*sizeof(long long int));
 	cudaMalloc((long long int**)&d_n,b*c*sizeof(long long int));
@@ -50,26 +49,25 @@ int main()
 	 
 	Matrix_Mul<<<DimGrid,DimBlock>>>(d_m,d_n,d_p,a,b,c);
 	
-	printf("EF");
 	cudaMemcpy(h_m,d_m,a*b*sizeof(long long int),cudaMemcpyDeviceToHost);
     cudaMemcpy(h_n,d_n,b*c*sizeof(long long int),cudaMemcpyDeviceToHost);
     cudaMemcpy(h_p,d_p,a*c*sizeof(long long int),cudaMemcpyDeviceToHost);
 	
 	for(i=0;i<a;i++)
     {
-        for(j=0;j<b;j++)
-            printf("%lld ",*(h_p + i*b + j));
-        printf("\n");
-    }
-    printf("\n");
-    for(i=0;i<b;i++)
-    {
         for(j=0;j<c;j++)
-            printf("%lld ",*(h_m + i*c + j));
+            printf("%lld ",*(h_p + i*c + j));
         printf("\n");
     }
     printf("\n");
-	for(i=0;i<a;i++)
+    for(i=0;i<a;i++)
+    {
+        for(j=0;j<b;j++)
+            printf("%lld ",*(h_m + i*b + j));
+        printf("\n");
+    }
+    printf("\n");
+	for(i=0;i<b;i++)
 	{
 		for(j=0;j<c;j++)
 			printf("%lld ",*(h_n + i*c + j));

@@ -16,6 +16,7 @@ static void compute(unsigned char *output, unsigned char *input,
 			float g = input[3 * idx + 1]; // green value for pixel
 			float b = input[3 * idx + 2];
 			output[idx] = (unsigned char)(0.21f * r + 0.71f * g + 0.07f * b);
+			std::cout<<(float) output[idx] << endl;
 		}
 	}
 }
@@ -77,14 +78,19 @@ static void create_dataset(const int datasetNum, const int y,
 	// per dataset.
 	// Eg.  ImageColorToGrayscale-Dataset-0, ImageColorToGrayscale-Dataset-1, ...
 
-	char *input_file_name = "input.ppm";
-	char *output_file_name = "output.pbm";
+	char *input_file_name = (char *)"input.ppm";
+	char *output_file_name = (char *)"output.pbm";
 
 	unsigned char *input_data = generate_data(y, x);
 	unsigned char *output_data =
 		(unsigned char *)calloc(sizeof(unsigned char), y * x * 3);
 
 	compute(output_data, input_data, y, x);
+
+	// for (int i = 0; i < x * y * 3; i++)
+	// {
+	// 	std ::cout << (float)input_data[i] / 256 << std::endl;
+	// }
 
 	write_data(input_file_name, input_data, x, y, 3);
 	write_data(output_file_name, output_data, x, y, 1);
@@ -97,8 +103,17 @@ int main()
 {
 
 	//@@
-	base_dir = "./ImageColorToGrayscale-Dataset";
+	base_dir = (char *)"./ImageColorToGrayscale-Dataset";
 
-	create_dataset(0, 2, 2);
+	// create_dataset(0, 256, 256);
+	// create_dataset(1, 512, 512);
+	// create_dataset(2, 512, 256);
+	// create_dataset(3, 89, 1024);
+	// create_dataset(4, 1023, 1024);
+	// create_dataset(5, 1023, 1124);
+	// create_dataset(6, 1923, 1124);
+	// create_dataset(7, 1920, 1124);
+	// create_dataset(8, 1020, 1024);
+	create_dataset(9, 16, 16);
 	return 0;
 }

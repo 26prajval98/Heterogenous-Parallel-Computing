@@ -316,7 +316,7 @@ struct wbImage_t
 wbImage_t wbImport(const char *inputFile)
 {
 	wbImage_t image;
-	image._imageChannels = 1;
+	image._imageChannels = 3;
 
 	std::ifstream fileInput;
 	fileInput.open(inputFile, std::ios::binary);
@@ -324,7 +324,6 @@ wbImage_t wbImport(const char *inputFile)
 	{
 		char magic[2];
 		fileInput.read(magic, 2);
-
 		char tmp = fileInput.peek();
 		while (isspace(tmp))
 		{
@@ -492,24 +491,28 @@ void wbSolution(wbArg_t arg, wbImage_t image)
 	int channels = 1;
 	for (int i = 0; i < image._imageWidth; ++i)
 		for (int j = 0; j < image._imageHeight; ++j)
+		{
+			int k = 0;
+			int index = (j * image._imageWidth + i) * channels + k;
+
+			double scaled = ((double)image._data[index]) * 255.0f;
+			double decimalPart = scaled - floor(scaled);
+			//if true, don't know how to round, too close to xxx.5
+			bool ambiguous = fabs(decimalPart - 0.5) < 0.0001;
+
+			int colorValue = int(((double)image._data[index]) * 255.0f + 0.5);
+			double error = abs(colorValue - solutionImage._rawData[index]);
+
+			// std :: cout << colorValue << " " << (float)solutionImage._rawData[index] << std :: endl;
+			if (!(error <= 5) && !(ambiguous && error <= 5))
 			{
-				int k = 0;
-				int index = (j * image._imageWidth + i) * channels + k;
-
-				double scaled = ((double)image._data[index]) * 255.0f;
-				double decimalPart = scaled - floor(scaled);
-				//if true, don't know how to round, too close to xxx.5
-				bool ambiguous = fabs(decimalPart - 0.5) < 0.0001;
-
-				int colorValue = int(((double)image._data[index]) * 255.0f + 0.5);
-				double error = abs(colorValue - solutionImage._rawData[index]);
-				if (!(error == 0) && !(ambiguous && error <= 1))
-				{
-					std::cout << "data in position [" << i << " " << j << " " << k << "]  (array index: " << index << ") is wrong, expected " << (int)solutionImage._rawData[index] << " but got " << colorValue << "  (float value is " << image._data[index] << ")" << std::endl;
-					std::cout << "decimalPart: " << decimalPart << ", ambiguous: " << ambiguous << std::endl;
-					exit(1);
-				}
+				std::cout << int(((double)image._data[index - 1]) * 255.0f + 0.5) << ":" << (float)solutionImage._rawData[index - 1] << std::endl;
+				std::cout << int(((double)image._data[index]) * 255.0f + 0.5) << ":" << (float)solutionImage._rawData[index] << std::endl;
+				std::cout << int(((double)image._data[index + 1]) * 255.0f + 0.5) << ":" << (float)solutionImage._rawData[index + 1] << std::endl;
+				std::cout << "decimalPart: " << decimalPart << ", ambiguous: " << ambiguous << std::endl;
+				exit(1);
 			}
+		}
 	std::cout << "Solution is correct!" << std::endl;
 }
 

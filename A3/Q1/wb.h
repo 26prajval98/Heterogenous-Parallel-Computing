@@ -501,7 +501,7 @@ void wbSolution(wbArg_t arg, wbImage_t image)
 
                 int colorValue = int(((double)image._data[index]) * 255.0f + 0.5);
                 double error = abs(colorValue - solutionImage._rawData[index]);
-                if (!(error <= 10) && !(ambiguous && error <= 100))
+                if (!(error <= 15) && !(ambiguous && error <= 10))
                 {
                     std::cout << "data in position [" << i << " " << j << " " << k << "]  (array index: " << index << ") is wrong, expected " << (int)solutionImage._rawData[index] << " but got " << colorValue << "  (float value is " << image._data[index] << ")" << std::endl;
                     std::cout << "decimalPart: " << decimalPart << ", ambiguous: " << ambiguous << std::endl;

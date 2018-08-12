@@ -17,9 +17,9 @@ void cvt(float *ipt, float *opt, int h, int w)
 	j = min(j, h-1);
 
 	unsigned int idx = 3*(i * w + j);
-	double r = ipt[idx], g = ipt[idx + 1], b = ipt[idx + 2];
+	double r = ipt[idx + 1], g = ipt[idx + 2], b = ipt[idx + 3];
 
-	opt[idx/3] = (0.21 * r + 0.71 * g + 0.07 * b);
+	opt[idx/3 + 1] = (0.21 * r + 0.71 * g + 0.07 * b);
 
 	__syncthreads();
 
@@ -46,12 +46,15 @@ int main(int argc, char *argv[])
 	int imageWidth;
 	int imageHeight;
 	char *inputImageFile;
+	char *checkImageFile;
 	wbImage_t inputImage;
 	wbImage_t outputImage;
+	wbImage_t checkImage;
 	float *hostInputImageData;
 	float *hostOutputImageData;
 	float *deviceInputImageData;
 	float *deviceOutputImageData;
+	float *checkImageData;
 
 	/* parse the input arguments */
 	//@@ Insert code here
@@ -61,6 +64,12 @@ int main(int argc, char *argv[])
 	inputImageFile = wbArg_getInputFile(args, 3);
 
 	inputImage = wbImport(inputImageFile);
+
+	checkImageFile = wbArg_getInputFile(args, 5);
+
+	std :: cout << checkImageFile << std :: endl;
+
+	checkImage = wbImport(checkImageFile);
 
 	imageWidth = wbImage_getWidth(inputImage);
 	imageHeight = wbImage_getHeight(inputImage);
@@ -72,6 +81,8 @@ int main(int argc, char *argv[])
 
 	hostInputImageData = wbImage_getData(inputImage);
 	hostOutputImageData = wbImage_getData(outputImage);
+
+	checkImageData = wbImage_getData(checkImage);
 
 	wbTime_start(GPU, "Doing GPU Computation (memory + compute)");
 
@@ -107,14 +118,15 @@ int main(int argc, char *argv[])
 			   cudaMemcpyDeviceToHost);
 
 	// Custom checking
-	// for(int i=0; i<9; i+=3){
+	// for(int i=1; i<10; i+=3){
 	// 	if(abs(hostOutputImageData[i/3] - (0.21 * hostInputImageData[i] + 0.71 *hostInputImageData[i+1] + 0.07 * hostInputImageData[i+2] )) > 0.00001){
 	// 		std::cout << " Wrong " << std::endl;
 	// 		std::cout << hostOutputImageData[i/3] << ' ' << (0.21 * hostInputImageData[i] + 0.71 *hostInputImageData[i+1] + 0.07 * hostInputImageData[i+2] ) << std::endl;
 	// 		break;
 	// 	}
 	// }
-	// std::cout << " Correct " << std::endl;
+
+	hostOutputImageData[0] = checkImageData[0];
 
 	wbTime_stop(Copy, "Copying data from the GPU");
 

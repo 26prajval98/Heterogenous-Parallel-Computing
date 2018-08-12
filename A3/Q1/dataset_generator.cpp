@@ -1,6 +1,5 @@
 #include <bits/stdc++.h>
 
-using namespace std;
 #define CHANNELS 3
 
 static char *base_dir;
@@ -19,9 +18,6 @@ static void compute(unsigned char *output, unsigned char *input,
 			output[idx] = (unsigned char)(0.21f * r + 0.71f * g + 0.07f * b);
 		}
 	}
-	cout << (float)output[0] << " " << (float)input[0] << " " << (float)input[1] << " " << (float)input[2] << " " << (0.21f * input[0] + 0.71f * input[1] + 0.07f * input[2]) << endl;
-	cout << (float)output[1] << " " << (float)input[3] << " " << (float)input[4] << " " << (float)input[5] << " " << (0.21f * input[3] + 0.71f * input[4] + 0.07f * input[5]) << endl;
-
 }
 
 static unsigned char *generate_data(const unsigned int y,
@@ -67,24 +63,22 @@ static void write_data(char *file_name, unsigned char *data,
 	fprintf(handle, "%d %d\n", width, height);
 	fprintf(handle, "255\n");
 
-	for (int i = 0; i < 10 && channels == 1; i++)
-	{
-		cout << (float)data[i] << endl;
-	}
 	fwrite(data, width * channels * sizeof(unsigned char), height, handle);
 
 	fflush(handle);
 	fclose(handle);
 }
 
-static void create_dataset(const int datasetNum, const int y, const int x)
+static void create_dataset(const int datasetNum, const int y,
+						   const int x)
 {
 
 	//@@ modify to create a separate directory
 	// per dataset.
 	// Eg.  ImageColorToGrayscale-Dataset-0, ImageColorToGrayscale-Dataset-1, ...
-	char *input_file_name = (char *) "input.ppm";
-	char *output_file_name = (char *)  "output.pbm";
+
+	char *input_file_name = "input.ppm";
+	char *output_file_name = "output.pbm";
 
 	unsigned char *input_data = generate_data(y, x);
 	unsigned char *output_data =
@@ -103,17 +97,8 @@ int main()
 {
 
 	//@@
-	base_dir = (char *) "./ImageColorToGrayscale-Dataset";
+	base_dir = "./ImageColorToGrayscale-Dataset";
 
-	// create_dataset(0, 256, 256);
-	// create_dataset(1, 512, 512);
-	// create_dataset(2, 512, 256);
-	// create_dataset(3, 89, 1024);
-	// create_dataset(4, 1023, 1024);
-	// create_dataset(5, 1023, 1124);
-	// create_dataset(6, 1923, 1124);
-	// create_dataset(7, 1920, 1124);
-	// create_dataset(8, 1020, 1024);
-	create_dataset(9, 3020, 124);
+	create_dataset(0, 2, 2);
 	return 0;
 }

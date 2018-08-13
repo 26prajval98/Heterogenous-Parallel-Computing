@@ -1,3 +1,6 @@
+// 16CO145 - Sumukha PK
+// 16CO234 - Prajval M
+
 #include <bits/stdc++.h>
 
 #define CHANNELS 3

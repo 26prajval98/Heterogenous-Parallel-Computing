@@ -9,7 +9,6 @@ void write(unsigned char * ip, int nos){
 	for(int i=0; i < nos; i++){
 		ipt << (int)ip[i] << std::endl;
 	}
-	std::cout << nos <<std:: endl;
 	ipt.close();
 }
 
@@ -123,6 +122,6 @@ int main()
 	// create_dataset(6, 1923, 1124);
 	// create_dataset(7, 1920, 1124);
 	// create_dataset(8, 1020, 1024);
-	create_dataset(9, 16, 16);
-	return 0;
+  	create_dataset(9, 3920, 124);
+  	return 0;
 }

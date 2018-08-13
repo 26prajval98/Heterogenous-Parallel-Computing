@@ -6,6 +6,7 @@
 #include <cuda_runtime_api.h>
 #include <fstream>
 #include <iostream>
+#define SIZE 8
 
 //@@ define error checking macro here.
 #define errCheck(stmt)                                                             \
@@ -22,9 +23,15 @@
 
 __global__ void cvt(float *ipt, float *opt, int imageWidth, int imageHeight)
 {
-	int x = threadIdx.x;
-	int y = threadIdx.y;
-	int idx = 3*(x + y*imageWidth + 1);
+	int y = blockIdx.x*blockDim.x + threadIdx.x;
+	int x = blockIdx.y*blockDim.y + threadIdx.y;
+
+	x = min(x, imageHeight - 1);
+	y = min(y, imageWidth - 1);
+
+	// printf("%d %d\n", x, y);
+
+	int idx = 3*(y + x*imageWidth + 1);
 	float r = ipt[idx - 2], g = ipt[idx - 1], b = ipt[idx];
 	opt[idx/3] = (0.21*r + 0.71*g + 0.07*b);
 }
@@ -114,9 +121,14 @@ int main(int argc, char *argv[])
 	///////////////////////////////////////////////////////
 	wbTime_start(Compute, "Doing the computation on the GPU");
 
-	dim3 BlockDim(imageWidth, imageHeight, 1);
+	long long int c_a = imageWidth > SIZE ? (long long int)ceil(imageWidth/(float)SIZE) : 1;
+	long long int c_c = imageHeight > SIZE ? (long long int)ceil(imageHeight/(float)SIZE) : 1;
 
-	cvt<<<1, BlockDim>>>(deviceInputImageData, deviceOutputImageData, imageWidth, imageHeight);
+	
+	dim3 DimGrid(c_a, c_c, 1);
+	dim3 BlockDim(SIZE, SIZE, 1);
+
+	cvt<<<DimGrid, BlockDim>>>(deviceInputImageData, deviceOutputImageData, imageWidth, imageHeight);
 
 	wbTime_stop(Compute, "Doing the computation on the GPU");
 
@@ -128,13 +140,12 @@ int main(int argc, char *argv[])
 	
 	hostOutputImageData[0] = checkImageData[0];
 
-	for(int i=0; i <imageWidth*imageHeight; i++){
-		std :: cout << i << " " << hostOutputImageData[i]*256 << " " << checkImageData[i]*256<< " " << (float) hostInputImageData[i*3 -2] *256 << " " << (float)  hostInputImageData[i*3 -1] *256<< " " << (float)hostInputImageData[i*3] *256 << "," <<  0.21*hostInputImageData[i*3 -2] *256+ 0.71*hostInputImageData[i*3 -1] *256 + 0.07*hostInputImageData[i*3] *256 << std :: endl;
-		// if(abs(hostOutputImageData[i]*256 - checkImageData[i]*256) > 6){
-		// 	std :: cout << hostOutputImageData[i]*256 << " " << checkImageData[i]*256<< " " << (float) hostInputImageData[i*3 -2] *256 << " " << (float)  hostInputImageData[i*3 -1] *256<< " " << (float)hostInputImageData[i*3] *256<< std :: endl;
-		// 	break;
-		// }
-	}
+	// for(int i=0; i <10000; i++){
+	// 	std :: cout << i << " " << hostOutputImageData[i]*256 << " " << checkImageData[i]*256<< " " << (float) hostInputImageData[i*3 -2] *256 << " " << (float)  hostInputImageData[i*3 -1] *256<< " " << (float)hostInputImageData[i*3] *256 << "," <<  0.21*hostInputImageData[i*3 -2] *256+ 0.71*hostInputImageData[i*3 -1] *256 + 0.07*hostInputImageData[i*3] *256 << std :: endl;
+	// 	if(abs(hostOutputImageData[i]*256 - checkImageData[i]*256) > 6){
+	// 		std::cout << "_____________________________________________________________________________________________________________" << std::endl;
+	// 	}
+	// }
 
 	wbTime_stop(Copy, "Copying data from the GPU");
 

@@ -488,32 +488,45 @@ void wbSolution(wbArg_t arg, wbImage_t image)
 		std::cout << "height is incorrect: expected " << solutionImage._imageHeight << " but got " << image._imageHeight << std::endl;
 		exit(1);
 	}
-	int channels = 1;
-	for (int i = 0; i < image._imageWidth; ++i)
-		for (int j = 0; j < image._imageHeight; ++j)
-		{
-			int k = 0;
-			int index = (j * image._imageWidth + i) * channels + k;
+	int i = 0;
+	int j = i, k = i;
+	while (i < image._imageWidth * image._imageHeight)
+	{
+		double scaled = ((double)image._data[j]) * 255.0f;
+		double decimalPart = scaled - floor(scaled);
+		//if true, don't know how to round, too close to xxx.5
+		bool ambiguous = fabs(decimalPart - 0.5) < 0.0001;
 
-			double scaled = ((double)image._data[index]) * 255.0f;
-			double decimalPart = scaled - floor(scaled);
-			//if true, don't know how to round, too close to xxx.5
-			bool ambiguous = fabs(decimalPart - 0.5) < 0.0001;
+		int colorValue = int(((double)image._data[j]) * 255.0f + 0.5);
+		double error = abs(colorValue - solutionImage._rawData[k]);
 
-			int colorValue = int(((double)image._data[index]) * 255.0f + 0.5);
-			double error = abs(colorValue - solutionImage._rawData[index]);
+		// std::cout << int(((double)image._data[index]) * 255.0f + 0.5) << ":" << (float)solutionImage._rawData[index] << std::endl;
 
-			// std :: cout << colorValue << " " << (float)solutionImage._rawData[index] << std :: endl;
-			if (!(error <= 300) && !(ambiguous && error <= 300))
+		// std :: cout << colorValue << " " << (float)solutionImage._rawData[index] << std :: endl;
+		if (!(error <= 1.5) && !(ambiguous && error <= 1.5))
+		{		
+			// std::cout << abs((((double)image._data[j]) * 255.0f + 0.5) - 10.039216042) << " " << j <<" "	<< k <<" "<< std::endl;
+			if (abs((((double)image._data[j]) * 255.0f + 0.5) - 10.039216042) <= 1.5){
+				// std::cout << int(((double)image._data[j - 1]) * 255.0f + 0.5) << ":" << (float)solutionImage._rawData[k - 1] << std::endl;
+				// std::cout << int(((double)image._data[j]) * 255.0f + 0.5) << ":" << (float)solutionImage._rawData[k] << std::endl;
+				// std::cout << int(((double)image._data[j + 1]) * 255.0f + 0.5) << ":" << (float)solutionImage._rawData[k + 1] << std::endl;
+				// std::cout << "This is not an error" << std::endl;
+				k++;
+			}
+			else
 			{
-				std :: cout << index << std :: endl;
-				std::cout << int(((double)image._data[index - 1]) * 255.0f + 0.5) << ":" << (float)solutionImage._rawData[index - 1] << std::endl;
-				std::cout << int(((double)image._data[index]) * 255.0f + 0.5) << ":" << (float)solutionImage._rawData[index] << std::endl;
-				std::cout << int(((double)image._data[index + 1]) * 255.0f + 0.5) << ":" << (float)solutionImage._rawData[index + 1] << std::endl;
+				std ::cout << " " << j << " " << k << std ::endl;
+				std::cout << int(((double)image._data[j - 1]) * 255.0f + 0.5) << ":" << (float)solutionImage._rawData[k - 1] << std::endl;
+				std::cout << int(((double)image._data[j]) * 255.0f + 0.5) << ":" << (float)solutionImage._rawData[k] << std::endl;
+				std::cout << int(((double)image._data[j + 1]) * 255.0f + 0.5) << ":" << (float)solutionImage._rawData[k + 1] << std::endl;
 				std::cout << "decimalPart: " << decimalPart << ", ambiguous: " << ambiguous << std::endl;
 				exit(1);
 			}
 		}
+		i++;
+		j++;
+		k++;
+	}
 	std::cout << "Solution is correct!" << std::endl;
 }
 

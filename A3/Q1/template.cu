@@ -4,6 +4,8 @@
 #include <cuda.h>
 #include "wb.h"
 #include <cuda_runtime_api.h>
+#include <fstream>
+#include <iostream>
 
 //@@ define error checking macro here.
 #define errCheck(stmt)                                                             \
@@ -24,7 +26,24 @@ __global__ void cvt(float *ipt, float *opt, int imageWidth, int imageHeight)
 	int y = threadIdx.y;
 	int idx = 3*(x + y*imageWidth + 1);
 	float r = ipt[idx - 2], g = ipt[idx - 1], b = ipt[idx];
-	opt[idx/3] = 0.21*r + 0.71*g + 0.07*b;
+	opt[idx/3] = (0.21*r + 0.71*g + 0.07*b);
+}
+
+void read(int size, float * hostInputImageData){
+	std::ifstream input1("input.txt");
+	unsigned int x;
+	int i=0;
+	for(i=1; i <size; i+=3){
+		input1 >> x;
+		float r = (float)x;
+		input1 >> x;
+		float g = (float)x;
+		input1 >> x; 
+		float b = (float)x;
+		hostInputImageData[i] = r/256;
+		hostInputImageData[i + 1] = g/256;
+		hostInputImageData[i + 2] = b/256;
+	}
 }
 
 int main(int argc, char *argv[])
@@ -67,6 +86,9 @@ int main(int argc, char *argv[])
 
 	hostInputImageData = wbImage_getData(inputImage);
 	hostOutputImageData = wbImage_getData(outputImage);
+	
+	read(imageHeight*imageWidth*3, hostInputImageData);
+
 	checkImageData =  wbImage_getData(checkImage);
 
 	wbTime_start(GPU, "Doing GPU Computation (memory + compute)");
@@ -107,11 +129,11 @@ int main(int argc, char *argv[])
 	hostOutputImageData[0] = checkImageData[0];
 
 	for(int i=0; i <imageWidth*imageHeight; i++){
-		std :: cout << i << " " << hostOutputImageData[i]*256 << " " << checkImageData[i]*256<< " " << (float) hostInputImageData[i*3 -2] *256 << " " << (float)  hostInputImageData[i*3 -1] *256<< " " << (float)hostInputImageData[i*3] *256<< std :: endl;
-		if(abs(hostOutputImageData[i]*256 - checkImageData[i]*256) > 6){
-			std :: cout << hostOutputImageData[i]*256 << " " << checkImageData[i]*256<< " " << (float) hostInputImageData[i*3 -2] *256 << " " << (float)  hostInputImageData[i*3 -1] *256<< " " << (float)hostInputImageData[i*3] *256<< std :: endl;
-			break;
-		}
+		std :: cout << i << " " << hostOutputImageData[i]*256 << " " << checkImageData[i]*256<< " " << (float) hostInputImageData[i*3 -2] *256 << " " << (float)  hostInputImageData[i*3 -1] *256<< " " << (float)hostInputImageData[i*3] *256 << "," <<  0.21*hostInputImageData[i*3 -2] *256+ 0.71*hostInputImageData[i*3 -1] *256 + 0.07*hostInputImageData[i*3] *256 << std :: endl;
+		// if(abs(hostOutputImageData[i]*256 - checkImageData[i]*256) > 6){
+		// 	std :: cout << hostOutputImageData[i]*256 << " " << checkImageData[i]*256<< " " << (float) hostInputImageData[i*3 -2] *256 << " " << (float)  hostInputImageData[i*3 -1] *256<< " " << (float)hostInputImageData[i*3] *256<< std :: endl;
+		// 	break;
+		// }
 	}
 
 	wbTime_stop(Copy, "Copying data from the GPU");

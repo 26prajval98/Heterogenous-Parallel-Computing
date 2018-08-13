@@ -4,6 +4,16 @@
 
 static char *base_dir;
 
+void write(unsigned char * ip, int nos){
+	std::ofstream ipt("input.txt");
+	for(int i=0; i < nos; i++){
+		ipt << (int)ip[i] << std::endl;
+	}
+	std::cout << nos <<std:: endl;
+	ipt.close();
+}
+
+
 static void compute(unsigned char *output, unsigned char *input,
 					unsigned int y, unsigned int x)
 {
@@ -16,7 +26,6 @@ static void compute(unsigned char *output, unsigned char *input,
 			float g = input[3 * idx + 1]; // green value for pixel
 			float b = input[3 * idx + 2];
 			output[idx] = (unsigned char)(0.21f * r + 0.71f * g + 0.07f * b);
-			std::cout<<(float) output[idx] << std :: endl;
 		}
 	}
 }
@@ -86,9 +95,12 @@ static void create_dataset(const int datasetNum, const int y,
 		(unsigned char *)calloc(sizeof(unsigned char), y * x * 3);
 
 	compute(output_data, input_data, y, x);
-	std ::cout << (float)input_data[0*3] <<  "," << (float)input_data[0*3 + 1] << "," << (float)input_data[0*3 + 2] <<"," << std::endl;
-	std ::cout << (float)input_data[177*3] <<  "," << (float)input_data[177*3 + 1] << "," << (float)input_data[177*3 + 2] <<"," << std::endl;
-	
+
+	// for(int i=0; i < x*y; i++)
+	// 	std ::cout << i << "," << (float)output_data[i] <<  "," << (float)input_data[i*3] << "," << (float)input_data[i*3 + 1] <<"," << (float)input_data[i*3 + 2] << std::endl;
+
+	write(input_data, x*y*3);
+
 	write_data(input_file_name, input_data, x, y, 3);
 	write_data(output_file_name, output_data, x, y, 1);
 
@@ -111,6 +123,6 @@ int main()
 	// create_dataset(6, 1923, 1124);
 	// create_dataset(7, 1920, 1124);
 	// create_dataset(8, 1020, 1024);
-	create_dataset(9, 8, 8);
+	create_dataset(9, 16, 16);
 	return 0;
 }

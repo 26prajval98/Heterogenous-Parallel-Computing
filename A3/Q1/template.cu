@@ -140,10 +140,18 @@ int main(int argc, char *argv[])
 	
 	hostOutputImageData[0] = checkImageData[0];
 
+<<<<<<< HEAD
 	// for(int i=0; i <10000; i++){
 	// 	std :: cout << i << " " << hostOutputImageData[i]*256 << " " << checkImageData[i]*256<< " " << (float) hostInputImageData[i*3 -2] *256 << " " << (float)  hostInputImageData[i*3 -1] *256<< " " << (float)hostInputImageData[i*3] *256 << "," <<  0.21*hostInputImageData[i*3 -2] *256+ 0.71*hostInputImageData[i*3 -1] *256 + 0.07*hostInputImageData[i*3] *256 << std :: endl;
 	// 	if(abs(hostOutputImageData[i]*256 - checkImageData[i]*256) > 6){
 	// 		std::cout << "_____________________________________________________________________________________________________________" << std::endl;
+=======
+	// for(int i=0; i <imageWidth*imageHeight; i++){
+	// 	//std :: cout << i << " " << hostOutputImageData[i]*256 << " " << checkImageData[i]*256<< " " << (float) hostInputImageData[i*3 -2] *256 << " " << (float)  hostInputImageData[i*3 -1] *256<< " " << (float)hostInputImageData[i*3] *256<< std :: endl;
+	// 	if(abs(hostOutputImageData[i]*256 - checkImageData[i]*256) > 6){
+	// 		//std :: cout << hostOutputImageData[i]*256 << " " << checkImageData[i]*256<< " " << (float) hostInputImageData[i*3 -2] *256 << " " << (float)  hostInputImageData[i*3 -1] *256<< " " << (float)hostInputImageData[i*3] *256<< std :: endl;
+	// 		break;
+>>>>>>> 0f8344e4e0399220e2d545ca4ab9b312afe17af7
 	// 	}
 	// }
 

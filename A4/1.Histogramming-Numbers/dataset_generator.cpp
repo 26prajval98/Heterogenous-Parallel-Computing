@@ -1,5 +1,7 @@
-
 #include "wb.h"
+#include <iostream>
+#include <fstream>
+using namespace std;
 
 static char *base_dir;
 const size_t NUM_BINS      = 4096;

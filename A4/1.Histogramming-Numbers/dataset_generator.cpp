@@ -1,4 +1,4 @@
-#include "wb.h"
+#include "../wb/wb.h"
 #include <iostream>
 #include <fstream>
 using namespace std;

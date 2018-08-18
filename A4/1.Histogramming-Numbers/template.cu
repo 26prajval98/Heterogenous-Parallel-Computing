@@ -30,7 +30,7 @@ __global__ void hist(int *d_ip, int *d_bin, int inputLength)
 		atomicAdd(&d_bin[d_ip[idx]], 1);
 }
 
-__global__ void reduce(int * d_bin)
+__global__ void saturate(int * d_bin)
 {
 	int idx = blockIdx.x*blockDim.x + threadIdx.x;
 	if(d_bin[idx] > BIN_CAP)
@@ -88,7 +88,7 @@ int main(int argc, char *argv[])
 	long long int d_x = inputLength > SIZE ? (long long int)ceil(inputLength/(float)SIZE) : 1;
 
 	hist<<<d_x, SIZE>>>(deviceInput, deviceBins, inputLength);
-	reduce<<<4, SIZE>>>(deviceBins);
+	saturate<<<4, SIZE>>>(deviceBins);
 
 	wbTime_stop(Compute, "Performing CUDA computation");
 

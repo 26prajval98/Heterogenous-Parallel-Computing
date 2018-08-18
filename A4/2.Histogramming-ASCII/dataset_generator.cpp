@@ -1,49 +1,60 @@
+#include <iostream>
+#include <fstream>
+#include <stdlib.h>
 
-#include "wb.h"
+using namespace std;
 
 static char *base_dir;
 const size_t NUM_BINS = 128;
 
-static void compute(unsigned int *bins, const char *input, int num) {
-  for (int i = 0; i < num; ++i) {
+static void compute(unsigned int *bins, const char *input, int num)
+{
+  for (int i = 0; i < num; ++i)
+  {
     ++bins[(unsigned int)input[i]];
   }
 }
 
-static char *generate_data(size_t n) {
+static char *generate_data(size_t n)
+{
   char *data = (char *)malloc(n + 1);
-  for (unsigned int i = 0; i < n; i++) {
+  for (unsigned int i = 0; i < n; i++)
+  {
     data[i] = (rand() % (128 - 32)) + 32; // random printable character
   }
   data[n] = 0; // null-terminated
   return data;
 }
 
-static void write_data_str(char *file_name, const char *data, int num) {
+static void write_data_str(char *file_name, const char *data, int num)
+{
   FILE *handle = fopen(file_name, "w");
-  for (int ii = 0; ii < num; ii++) {
+  for (int ii = 0; ii < num; ii++)
+  {
     fprintf(handle, "%c", *data++);
   }
   fflush(handle);
   fclose(handle);
 }
 
-static void write_data_int(char *file_name, unsigned int *data, int num) {
+static void write_data_int(char *file_name, unsigned int *data, int num)
+{
   FILE *handle = fopen(file_name, "w");
   fprintf(handle, "%d", num);
-  for (int ii = 0; ii < num; ii++) {
+  for (int ii = 0; ii < num; ii++)
+  {
     fprintf(handle, "\n%d", *data++);
   }
   fflush(handle);
   fclose(handle);
 }
 
-static void create_dataset_fixed(int datasetNum, const char *str) {
-  const char *dir_name =
-      wbDirectory_create(wbPath_join(base_dir, datasetNum));
+static void create_dataset_fixed(int datasetNum, const char *str)
+{
+  const char *dir_name = base_dir;
 
-  char *input_file_name  = wbPath_join(dir_name, "input.txt");
-  char *output_file_name = wbPath_join(dir_name, "output.raw");
+  char *input_file_name = (char *)"input.raw";
+  char *output_file_name = (char *)"output.raw";
 
   unsigned int *output_data =
       (unsigned int *)calloc(NUM_BINS, sizeof(unsigned int));
@@ -58,13 +69,13 @@ static void create_dataset_fixed(int datasetNum, const char *str) {
   free(output_file_name);
 }
 
-static void create_dataset_random(int datasetNum, size_t input_length) {
+static void create_dataset_random(int datasetNum, size_t input_length)
+{
 
-  const char *dir_name =
-      wbDirectory_create(wbPath_join(base_dir, datasetNum));
+  const char *dir_name = base_dir;
 
-  char *input_file_name  = wbPath_join(dir_name, "input.txt");
-  char *output_file_name = wbPath_join(dir_name, "output.raw");
+  char *input_file_name = (char *)"input.raw";
+  char *output_file_name = (char *)"output.raw";
 
   char *str = generate_data(input_length);
   unsigned int *output_data =
@@ -81,9 +92,9 @@ static void create_dataset_random(int datasetNum, size_t input_length) {
   free(output_file_name);
 }
 
-int main() {
-  base_dir =
-      wbPath_join(wbDirectory_current(), "TextHistogram", "Dataset");
+int main()
+{
+  base_dir = (char *)"";
 
   create_dataset_fixed(0, "the quick brown fox jumps over the lazy dog");
   create_dataset_fixed(1, "gpu teaching kit - accelerated computing");

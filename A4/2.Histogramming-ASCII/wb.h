@@ -414,7 +414,7 @@ char* wbArg_getInputFile(const wbArg_t argInfo, const int argNum)
 float* wbImport(const char* fName, int* numElements)
 {
     std::ifstream inFile(fName);
-
+    
     if (!inFile.is_open())
     {
         std::cerr << "Error opening input file " << fName << ". " << wbInternal::wbStrerror(errno) << std::endl;

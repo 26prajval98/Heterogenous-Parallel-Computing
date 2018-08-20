@@ -22,7 +22,8 @@
 #include <sstream>
 #include <string>
 #include <vector>
-
+#include <sys/stat.h>
+#include <stdlib.h>
 // CUDA
 #if defined(__CUDACC__)
     #include <cuda.h>
@@ -411,7 +412,7 @@ char* wbArg_getInputFile(const wbArg_t argInfo, const int argNum)
 }
 
 // For assignments MP1, MP4, MP5 & MP12
-float* wbImport(const char* fName, int* numElements)
+int* wbImport(const char* fName, int* numElements)
 {
     std::ifstream inFile(fName);
 
@@ -424,14 +425,14 @@ float* wbImport(const char* fName, int* numElements)
     inFile >> *numElements;
 
     std::string sVal;
-    std::vector<float> fVec;
+    std::vector<int> fVec;
 
     fVec.reserve(*numElements);
 
     while (inFile >> sVal)
     {
         std::istringstream iss(sVal);
-        float fVal;
+        int fVal;
         iss >> fVal;
         fVec.push_back(fVal);
     }
@@ -444,11 +445,11 @@ float* wbImport(const char* fName, int* numElements)
         std::exit(EXIT_FAILURE);
     }
 
-    float* fBuf = (float*) malloc(*numElements * sizeof(float));
+    int* fBuf = (int*) malloc(*numElements * sizeof(int));
 
     if (!fBuf)
     {
-        std::cerr << "Unable to allocate memory for an array of size " << *numElements * sizeof(float) << " bytes" << std::endl;
+        std::cerr << "Unable to allocate memory for an array of size " << *numElements * sizeof(int) << " bytes" << std::endl;
         inFile.close();
         std::exit(EXIT_FAILURE);
     }
@@ -967,11 +968,12 @@ template < typename T, typename S >
 void wbSolution(const wbArg_t args, const T& t, const S& s)
 {
     int solnItems;
-    float* soln = wbImport(wbArg_getInputFile(args, args.argc - 2), &solnItems);
+    std::cout << wbArg_getInputFile(args, args.argc - 2) << std::endl;
+    int* soln = wbImport(wbArg_getInputFile(args, args.argc - 2), &solnItems);
 
     if (solnItems != s)
     {
-        std::cout << "Number of elements in solution file " << wbArg_getInputFile(args, args.argc - 2) << " does not match. ";
+        std::cout << "Number of elements in solution file " << wbArg_getInputFile(args, args.argc - 3) << " does not match. ";
         std::cout << "Expecting " << s << " but got " << solnItems << ".\n";
     }
     else // Check solution
@@ -1078,6 +1080,7 @@ namespace wbInternal
 void wbSolution(const wbArg_t& args, const wbImage_t& image)
 {
     wbImage_t solnImage = wbImport(wbArg_getInputFile(args, args.argc - 2));
+    std::cout<<(args.argc - 2)<<std::endl;
 
     if (solnImage.width != image.width || solnImage.height != image.height)
     {

@@ -12,6 +12,8 @@ int *compute(int *bins, const char *input, int num)
 {
 	for (int i = 0; i < num; ++i)
 		++bins[(int)input[i]];
+
+	return bins;
 }
 
 static char *generate_data(size_t n)
@@ -41,13 +43,9 @@ void write_data_int(char *file_name, int *data, int num)
 {
 	std::ofstream handle(file_name);
 	handle << num << std::endl;
-	int ii = 0;
-	while(true)	
+	for(int ii = 0; ii <NUM_BINS; ii++)
 	{
-		std::cout << ii << " " << num << std::endl;
-		std::cout << data[ii] << std::endl;
 		handle << data[ii] << std::endl;
-		ii++;
 	}
 }
 
@@ -63,7 +61,7 @@ static void create_dataset_fixed(int datasetNum, const char *str)
 	for (int i = 0; i < NUM_BINS; i++)
 		output_data[i] = 0;
 
-	compute(output_data, str, strlen(str));
+	output_data = compute(output_data, str, strlen(str));
 
 	write_data_str(input_file_name, str, strlen(str));
 	write_data_int(output_file_name, output_data, NUM_BINS);
@@ -83,6 +81,9 @@ static void create_dataset_random(int datasetNum, size_t input_length)
 
 	char *str = generate_data(input_length);
 	int *output_data = (int *)calloc(NUM_BINS, sizeof(int));
+
+	for(int i=0; i < NUM_BINS; i++)
+		output_data[i] = 0;
 
 	output_data = compute(output_data, str, input_length);
 

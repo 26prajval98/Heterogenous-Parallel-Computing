@@ -25,15 +25,15 @@
 
 // CUDA
 #if defined(__CUDACC__)
-    #include <cuda.h>
-    #include <cuda_runtime.h>
+#include <cuda.h>
+#include <cuda_runtime.h>
 #else
 // OpenCL
-    #if defined(__APPLE__)
-        #include <OpenCL/cl.h>
-    #else
-        #include <CL/cl.h>
-    #endif
+#if defined(__APPLE__)
+#include <OpenCL/cl.h>
+#else
+#include <CL/cl.h>
+#endif
 #endif
 
 ////
@@ -41,18 +41,18 @@
 ////
 
 #ifndef NDEBUG
-    #define wbAssert(condition, message)                                                                  \
-        do                                                                                                \
-        {                                                                                                 \
-            if (!(condition))                                                                             \
-            {                                                                                             \
-                std::cerr << "Assertion failed: (" #condition "), function " << __FUNCTION__ << ", file " \
-                          << __FILE__  << ", line " << __LINE__ << ": " << message << std::endl;          \
-                std::exit(EXIT_FAILURE);                                                                  \
-            }                                                                                             \
-        } while (0)
+#define wbAssert(condition, message)                                                                  \
+    do                                                                                                \
+    {                                                                                                 \
+        if (!(condition))                                                                             \
+        {                                                                                             \
+            std::cerr << "Assertion failed: (" #condition "), function " << __FUNCTION__ << ", file " \
+                      << __FILE__ << ", line " << __LINE__ << ": " << message << std::endl;           \
+            std::exit(EXIT_FAILURE);                                                                  \
+        }                                                                                             \
+    } while (0)
 #else
-    #define wbAssert(condition, message)
+#define wbAssert(condition, message)
 #endif
 
 ////
@@ -61,12 +61,12 @@
 
 namespace wbInternal
 {
-    // Maximum number of errors to display in wbSolution()
-    const int kErrorReportLimit = 10;
+// Maximum number of errors to display in wbSolution()
+const int kErrorReportLimit = 10;
 
-    // For further information, see the PPM image format documentation at http://netpbm.sourceforge.net
-    const int kImageChannels = 3;
-    const int kImageColorLimit = 255;
+// For further information, see the PPM image format documentation at http://netpbm.sourceforge.net
+const int kImageChannels = 3;
+const int kImageColorLimit = 255;
 } // namespace wbInternal
 
 ////
@@ -76,58 +76,58 @@ namespace wbInternal
 namespace wbInternal
 {
 #if defined(_WIN32)
-    std::string wbStrerror(int errnum)
+std::string wbStrerror(int errnum)
+{
+    std::string str;
+    char buffer[1024];
+
+    if (errnum)
     {
-        std::string str;
-        char buffer[1024];
-
-        if (errnum)
-        {
-            (void) strerror_s(buffer, sizeof(buffer), errnum);
-            str = buffer;
-        }
-
-        return str;
+        (void)strerror_s(buffer, sizeof(buffer), errnum);
+        str = buffer;
     }
-#elif (_POSIX_C_SOURCE >= 200112L || _XOPEN_SOURCE >= 600 || __APPLE__) && ! _GNU_SOURCE
-    std::string wbStrerror(int errnum)
+
+    return str;
+}
+#elif (_POSIX_C_SOURCE >= 200112L || _XOPEN_SOURCE >= 600 || __APPLE__) && !_GNU_SOURCE
+std::string wbStrerror(int errnum)
+{
+    std::string str;
+    char buffer[1024];
+
+    if (errnum)
     {
-        std::string str;
-        char buffer[1024];
-
-        if (errnum)
-        {
-            (void) strerror_r(errnum, buffer, sizeof(buffer));
-            str = buffer;
-        }
-
-        return str;
+        (void)strerror_r(errnum, buffer, sizeof(buffer));
+        str = buffer;
     }
+
+    return str;
+}
 #elif defined(_GNU_SOURCE)
-    std::string wbStrerror(int errnum)
+std::string wbStrerror(int errnum)
+{
+    std::string str;
+    char buffer[1024];
+
+    if (errnum)
     {
-        std::string str;
-        char buffer[1024];
-
-        if (errnum)
-        {
-            str = strerror_r(errnum, buffer, sizeof(buffer));
-        }
-
-        return str;
+        str = strerror_r(errnum, buffer, sizeof(buffer));
     }
+
+    return str;
+}
 #else
-    std::string wbStrerror(int errnum)
+std::string wbStrerror(int errnum)
+{
+    std::string str;
+
+    if (errnum)
     {
-        std::string str;
-
-        if (errnum)
-        {
-            str = strerror(errnum);
-        }
-
-        return str;
+        str = strerror(errnum);
     }
+
+    return str;
+}
 #endif
 } // namespace wbInternal
 
@@ -140,7 +140,7 @@ namespace wbInternal
     case error:               \
         return #error
 
-const char* wbOpenCLGetErrorString(cl_int error)
+const char *wbOpenCLGetErrorString(cl_int error)
 {
     switch (error)
     {
@@ -281,19 +281,19 @@ const char* wbOpenCLGetErrorString(cl_int error)
 
 namespace wbInternal
 {
-    enum wbLogLevel
-    {
-        wbLogLevel_OFF,
-        wbLogLevel_FATAL,
-        wbLogLevel_ERROR,
-        wbLogLevel_WARN,
-        wbLogLevel_INFO,
-        wbLogLevel_DEBUG,
-        wbLogLevel_TRACE,
-        wbLogLevel_INVALID // Keep this at the end
-    };
+enum wbLogLevel
+{
+    wbLogLevel_OFF,
+    wbLogLevel_FATAL,
+    wbLogLevel_ERROR,
+    wbLogLevel_WARN,
+    wbLogLevel_INFO,
+    wbLogLevel_DEBUG,
+    wbLogLevel_TRACE,
+    wbLogLevel_INVALID // Keep this at the end
+};
 
-    const char* wbLogLevelStr[] =
+const char *wbLogLevelStr[] =
     {
         "Off",
         "Fatal",
@@ -303,77 +303,77 @@ namespace wbInternal
         "Debug",
         "Trace",
         "***InvalidLogLevel***" // Keep this at the end
-    };
+};
 
-    const char* wbLogLevelToStr(const wbLogLevel level)
-    {
-        wbAssert(level >= wbLogLevel_OFF && level < wbLogLevel_INVALID, "Unrecognized wbLogLevel value");
-        return wbLogLevelStr[level];
-    }
+const char *wbLogLevelToStr(const wbLogLevel level)
+{
+    wbAssert(level >= wbLogLevel_OFF && level < wbLogLevel_INVALID, "Unrecognized wbLogLevel value");
+    return wbLogLevelStr[level];
+}
 
 //-----------------------------------------------------------------------------
 // Begin: Ugly C++03 hack
 // NVCC 5.0 does not support C++11 variadic templates
 
-    template<typename T1>
-    inline void wbLog(T1 const& p1)
-    {
-        std::cout << p1;
-    }
+template <typename T1>
+inline void wbLog(T1 const &p1)
+{
+    std::cout << p1;
+}
 
-    template<typename T1, typename T2>
-    inline void wbLog(T1 const& p1, T2 const& p2)
-    {
-        std::cout << p1 << p2;
-    }
+template <typename T1, typename T2>
+inline void wbLog(T1 const &p1, T2 const &p2)
+{
+    std::cout << p1 << p2;
+}
 
-    template<typename T1, typename T2, typename T3>
-    inline void wbLog(T1 const& p1, T2 const& p2, T3 const& p3)
-    {
-        std::cout << p1 << p2 << p3;
-    }
+template <typename T1, typename T2, typename T3>
+inline void wbLog(T1 const &p1, T2 const &p2, T3 const &p3)
+{
+    std::cout << p1 << p2 << p3;
+}
 
-    template<typename T1, typename T2, typename T3, typename T4>
-    inline void wbLog(T1 const& p1, T2 const& p2, T3 const& p3, T4 const& p4)
-    {
-        std::cout << p1 << p2 << p3 << p4;
-    }
+template <typename T1, typename T2, typename T3, typename T4>
+inline void wbLog(T1 const &p1, T2 const &p2, T3 const &p3, T4 const &p4)
+{
+    std::cout << p1 << p2 << p3 << p4;
+}
 
-    template<typename T1, typename T2, typename T3, typename T4, typename T5>
-    inline void wbLog(T1 const& p1, T2 const& p2, T3 const& p3, T4 const& p4, T5 const& p5)
-    {
-        std::cout << p1 << p2 << p3 << p4 << p5;
-    }
+template <typename T1, typename T2, typename T3, typename T4, typename T5>
+inline void wbLog(T1 const &p1, T2 const &p2, T3 const &p3, T4 const &p4, T5 const &p5)
+{
+    std::cout << p1 << p2 << p3 << p4 << p5;
+}
 
-    template<typename T1, typename T2, typename T3, typename T4, typename T5, typename T6>
-    inline void wbLog(T1 const& p1, T2 const& p2, T3 const& p3, T4 const& p4, T5 const& p5, T6 const& p6)
-    {
-        std::cout << p1 << p2 << p3 << p4 << p5 << p6;
-    }
+template <typename T1, typename T2, typename T3, typename T4, typename T5, typename T6>
+inline void wbLog(T1 const &p1, T2 const &p2, T3 const &p3, T4 const &p4, T5 const &p5, T6 const &p6)
+{
+    std::cout << p1 << p2 << p3 << p4 << p5 << p6;
+}
 
-    template<typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7>
-    inline void wbLog(T1 const& p1, T2 const& p2, T3 const& p3, T4 const& p4, T5 const& p5, T6 const& p6, T7 const& p7)
-    {
-        std::cout << p1 << p2 << p3 << p4 << p5 << p6 << p7;
-    }
+template <typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7>
+inline void wbLog(T1 const &p1, T2 const &p2, T3 const &p3, T4 const &p4, T5 const &p5, T6 const &p6, T7 const &p7)
+{
+    std::cout << p1 << p2 << p3 << p4 << p5 << p6 << p7;
+}
 
-    template<typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7, typename T8>
-    inline void wbLog(T1 const& p1, T2 const& p2, T3 const& p3, T4 const& p4, T5 const& p5, T6 const& p6, T7 const& p7, T8 const& p8)
-    {
-        std::cout << p1 << p2 << p3 << p4 << p5 << p6 << p7 << p8;
-    }
+template <typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7, typename T8>
+inline void wbLog(T1 const &p1, T2 const &p2, T3 const &p3, T4 const &p4, T5 const &p5, T6 const &p6, T7 const &p7, T8 const &p8)
+{
+    std::cout << p1 << p2 << p3 << p4 << p5 << p6 << p7 << p8;
+}
 
-    template<typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7, typename T8, typename T9>
-    inline void wbLog(T1 const& p1, T2 const& p2, T3 const& p3, T4 const& p4, T5 const& p5, T6 const& p6, T7 const& p7, T8 const& p8, T9 const& p9)
-    {
-        std::cout << p1 << p2 << p3 << p4 << p5 << p6 << p7 << p8 << p9;
-    }
+template <typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7, typename T8, typename T9>
+inline void wbLog(T1 const &p1, T2 const &p2, T3 const &p3, T4 const &p4, T5 const &p5, T6 const &p6, T7 const &p7, T8 const &p8, T9 const &p9)
+{
+    std::cout << p1 << p2 << p3 << p4 << p5 << p6 << p7 << p8 << p9;
+}
 
-    template<typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7, typename T8, typename T9, typename T10>
-    inline void wbLog(T1 const& p1, T2 const& p2, T3 const& p3, T4 const& p4, T5 const& p5, T6 const& p6, T7 const& p7, T8 const& p8, T9 const& p9, T10 const& p10)
-    {
-        std::cout << p1 << p2 << p3 << p4 << p5 << p6 << p7 << p8 << p9 << p10;
-    }
+template <typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7, typename T8, typename T9, typename T10>
+inline void wbLog(T1 const &p1, T2 const &p2, T3 const &p3, T4 const &p4, T5 const &p5, T6 const &p6, T7 const &p7, T8 const &p8, T9 const &p9, T10 const &p10)
+{
+    std::cout << p1 << p2 << p3 << p4 << p5 << p6 << p7 << p8 << p9 << p10;
+}
 } // namespace wbInternal
 
 // End: Ugly C++03 hack
@@ -394,57 +394,79 @@ namespace wbInternal
 
 struct wbArg_t
 {
-    int    argc;
-    char** argv;
+    int argc;
+    char **argv;
 };
 
-wbArg_t wbArg_read(const int argc, char** argv)
+wbArg_t wbArg_read(const int argc, char **argv)
 {
-    wbArg_t argInfo = { argc, argv };
+    wbArg_t argInfo = {argc, argv};
     return argInfo;
 }
 
-char* wbArg_getInputFile(const wbArg_t argInfo, const int argNum)
+char *wbArg_getInputFile(const wbArg_t argInfo, const int argNum)
 {
     wbAssert(argNum >= 0 && argNum < (argInfo.argc - 1), "Unrecognized command line argument requested");
     return argInfo.argv[argNum + 1];
 }
 
 // For assignments MP1, MP4, MP5 & MP12
-float* wbImport(const char* fName, int* numElements)
+int *wbImport(const char *fname, int *itemNum)
+{
+    // Open file
+
+    std::ifstream inFile(fname);
+
+    if (!inFile)
+    {
+        std::cout << "Error opening input file: " << fname << " !\n";
+        exit(EXIT_FAILURE);
+    }
+
+    // Read from file
+
+    inFile >> *itemNum;
+
+    int *fBuf = (int *)malloc(*itemNum * sizeof(int));
+
+    if (!fBuf)
+    {
+        std::cout << "Unable to allocate memory for array of size " << *itemNum * sizeof(int) << " bytes";
+        exit(EXIT_FAILURE);
+    }
+
+    std::string sval;
+
+    for (int idx = 0; idx < *itemNum && inFile >> sval; ++idx)
+    {
+        std::istringstream iss(sval);
+        iss >> fBuf[idx];
+    }
+
+    return fBuf;
+}
+
+int *wbImport(const char *fName, int *numElements, int)
 {
     std::ifstream inFile(fName);
-    
+
     if (!inFile.is_open())
     {
         std::cerr << "Error opening input file " << fName << ". " << wbInternal::wbStrerror(errno) << std::endl;
         std::exit(EXIT_FAILURE);
     }
 
-    inFile >> *numElements;
-
     std::string sVal;
-    std::vector<float> fVec;
+    std::getline(inFile, sVal);
 
-    fVec.reserve(*numElements);
+    *numElements = sVal.size();
 
-    while (inFile >> sVal)
-    {
-        std::istringstream iss(sVal);
-        float fVal;
-        iss >> fVal;
-        fVec.push_back(fVal);
-    }
+    // for (int i = 0; i < sVal.size(); i++)
+    //     std::cout << (int)sVal[i] << "  " << i << std::endl;
 
     inFile.close();
 
-    if (*numElements != static_cast<int>(fVec.size()))
-    {
-        std::cerr << "Error reading contents of file " << fName << ". Expecting " << *numElements << " elements but got " << fVec.size() << std::endl;
-        std::exit(EXIT_FAILURE);
-    }
-
-    float* fBuf = (float*) malloc(*numElements * sizeof(float));
+    int *fBuf = (int *)malloc(*numElements * sizeof(int));
 
     if (!fBuf)
     {
@@ -453,77 +475,80 @@ float* wbImport(const char* fName, int* numElements)
         std::exit(EXIT_FAILURE);
     }
 
-    std::copy(fVec.begin(), fVec.end(), fBuf);
+    for (int i = 0; i < *numElements; i++)
+    {
+        fBuf[i] = (int)sVal[i];
+    }
 
     return fBuf;
 }
 
 namespace wbInternal
 {
-    // For assignment MP6
-    float* wbParseCSV(const char* fName, int* numRows, int* numCols)
+// For assignment MP6
+float *wbParseCSV(const char *fName, int *numRows, int *numCols)
+{
+    std::ifstream inFile(fName);
+
+    if (!inFile.is_open())
     {
-        std::ifstream inFile(fName);
-
-        if (!inFile.is_open())
-        {
-            std::cerr << "Error opening input file " << fName << ". " << wbInternal::wbStrerror(errno) << std::endl;
-            std::exit(EXIT_FAILURE);
-        }
-
-        std::vector<float> fVec;
-        std::string rowStr;
-        *numRows = *numCols = 0;
-
-        while (std::getline(inFile, rowStr))
-        {
-            std::istringstream rowStream(rowStr);
-            std::string cellStr;
-            ++(*numRows);
-            *numCols = 0;
-
-            while (std::getline(rowStream, cellStr, ','))
-            {
-                float fVal;
-                ++(*numCols);
-
-                if (!(std::istringstream(cellStr) >> fVal))
-                {
-                    std::cerr << "Error reading element (" << *numRows << ", " << *numCols << ") in file " << fName << std::endl;
-                    inFile.close();
-                    std::exit(EXIT_FAILURE);
-                }
-
-                fVec.push_back(fVal);
-            }
-        }
-
-        inFile.close();
-
-        const int numElements = *numRows * *numCols;
-
-        if ((*numRows != *numCols) || (0 == numElements))
-        {
-            std::cerr << "Error reading contents of file " << fName << ". Last element read (" << *numRows << ", " << *numCols << ")" << std::endl;
-            std::exit(EXIT_FAILURE);
-        }
-
-        float* fBuf = (float*) malloc(numElements * sizeof(float));
-
-        if (!fBuf)
-        {
-            std::cerr << "Unable to allocate memory for an array of size " << numElements * sizeof(float) << " bytes" << std::endl;
-            std::exit(EXIT_FAILURE);
-        }
-
-        std::copy(fVec.begin(), fVec.end(), fBuf);
-
-        return fBuf;
+        std::cerr << "Error opening input file " << fName << ". " << wbInternal::wbStrerror(errno) << std::endl;
+        std::exit(EXIT_FAILURE);
     }
+
+    std::vector<float> fVec;
+    std::string rowStr;
+    *numRows = *numCols = 0;
+
+    while (std::getline(inFile, rowStr))
+    {
+        std::istringstream rowStream(rowStr);
+        std::string cellStr;
+        ++(*numRows);
+        *numCols = 0;
+
+        while (std::getline(rowStream, cellStr, ','))
+        {
+            float fVal;
+            ++(*numCols);
+
+            if (!(std::istringstream(cellStr) >> fVal))
+            {
+                std::cerr << "Error reading element (" << *numRows << ", " << *numCols << ") in file " << fName << std::endl;
+                inFile.close();
+                std::exit(EXIT_FAILURE);
+            }
+
+            fVec.push_back(fVal);
+        }
+    }
+
+    inFile.close();
+
+    const int numElements = *numRows * *numCols;
+
+    if ((*numRows != *numCols) || (0 == numElements))
+    {
+        std::cerr << "Error reading contents of file " << fName << ". Last element read (" << *numRows << ", " << *numCols << ")" << std::endl;
+        std::exit(EXIT_FAILURE);
+    }
+
+    float *fBuf = (float *)malloc(numElements * sizeof(float));
+
+    if (!fBuf)
+    {
+        std::cerr << "Unable to allocate memory for an array of size " << numElements * sizeof(float) << " bytes" << std::endl;
+        std::exit(EXIT_FAILURE);
+    }
+
+    std::copy(fVec.begin(), fVec.end(), fBuf);
+
+    return fBuf;
+}
 } // namespace wbInternal
 
 // For assignments MP2, MP3 & MP6
-float* wbImport(const char* fName, int* numRows, int* numCols)
+float *wbImport(const char *fName, int *numRows, int *numCols)
 {
     std::string fNameStr(fName);
 
@@ -566,7 +591,7 @@ float* wbImport(const char* fName, int* numRows, int* numCols)
         std::exit(EXIT_FAILURE);
     }
 
-    float* fBuf = (float*) malloc(numElements * sizeof(float));
+    float *fBuf = (float *)malloc(numElements * sizeof(float));
 
     if (!fBuf)
     {
@@ -585,7 +610,7 @@ struct wbImage_t
     int height;
     int channels;
     int colors;
-    float* data;
+    float *data;
 
     wbImage_t(int imageWidth = 0, int imageHeight = 0, int imageChannels = wbInternal::kImageChannels, int imageColors = wbInternal::kImageColorLimit) : width(imageWidth), height(imageHeight), channels(imageChannels), colors(imageColors), data(NULL)
     {
@@ -598,7 +623,7 @@ struct wbImage_t
 };
 
 // For assignments MP6 & MP11
-wbImage_t wbImport(const char* fName)
+wbImage_t wbImport(const char *fName)
 {
     std::ifstream inFile(fName, std::ios::binary);
 
@@ -614,7 +639,8 @@ wbImage_t wbImport(const char* fName)
 
     if (magic != "P6")
     {
-        std::cerr << "Error reading image file " << fName << ". " << "Expecting 'P6' image format but got '" << magic << "'" << std::endl;
+        std::cerr << "Error reading image file " << fName << ". "
+                  << "Expecting 'P6' image format but got '" << magic << "'" << std::endl;
         inFile.close();
         std::exit(EXIT_FAILURE);
     }
@@ -662,9 +688,9 @@ wbImage_t wbImport(const char* fName)
 
     const int numElements = image.width * image.height * image.channels;
 
-    unsigned char* rawData = new unsigned char[numElements];
+    unsigned char *rawData = new unsigned char[numElements];
 
-    inFile.read(reinterpret_cast<char*>(rawData), numElements);
+    inFile.read(reinterpret_cast<char *>(rawData), numElements);
 
     const int elementsRead = static_cast<int>(inFile.gcount());
 
@@ -673,11 +699,11 @@ wbImage_t wbImport(const char* fName)
     if (elementsRead != numElements)
     {
         std::cerr << "Size of image in file " << fName << " does not match its header. Expecting " << numElements << " bytes, but got " << elementsRead << std::endl;
-        delete [] rawData;
+        delete[] rawData;
         std::exit(EXIT_FAILURE);
     }
 
-    float* data = new float[numElements];
+    float *data = new float[numElements];
 
     for (int i = 0; i < numElements; ++i)
     {
@@ -685,29 +711,29 @@ wbImage_t wbImport(const char* fName)
     }
 
     image.data = data;
-    delete [] rawData;
+    delete[] rawData;
 
     return image;
 }
 
-int wbImage_getWidth(const wbImage_t& image)
+int wbImage_getWidth(const wbImage_t &image)
 {
     return image.width;
 }
 
-int wbImage_getHeight(const wbImage_t& image)
+int wbImage_getHeight(const wbImage_t &image)
 {
     return image.height;
 }
 
-int wbImage_getChannels(const wbImage_t& image)
+int wbImage_getChannels(const wbImage_t &image)
 {
     return image.channels;
 }
 
-float* wbImage_getData(const wbImage_t& image)
+float *wbImage_getData(const wbImage_t &image)
 {
-     return image.data;
+    return image.data;
 }
 
 wbImage_t wbImage_new(const int imageWidth, const int imageHeight, const int imageChannels)
@@ -716,9 +742,9 @@ wbImage_t wbImage_new(const int imageWidth, const int imageHeight, const int ima
     return image;
 }
 
-void wbImage_delete(wbImage_t& image)
+void wbImage_delete(wbImage_t &image)
 {
-    delete [] image.data;
+    delete[] image.data;
 }
 
 ////
@@ -726,145 +752,145 @@ void wbImage_delete(wbImage_t& image)
 ////
 
 #if defined(__CUDACC__)
-    #define wbTimerDeviceSynchronize() cudaDeviceSynchronize()
+#define wbTimerDeviceSynchronize() cudaDeviceSynchronize()
 #else
-    #define wbTimerDeviceSynchronize()
+#define wbTimerDeviceSynchronize()
 #endif
 
 // Namespace because Windows.h causes errors
 namespace wbInternal
 {
 #if defined(_WIN32)
-    #include <Windows.h>
+#include <Windows.h>
 
-    // wbTimer class adapted from: https://bitbucket.org/ashwin/cudatimer
-    class wbTimer
+// wbTimer class adapted from: https://bitbucket.org/ashwin/cudatimer
+class wbTimer
+{
+  private:
+    double timerResolution;
+    LARGE_INTEGER startTime;
+    LARGE_INTEGER endTime;
+
+  public:
+    wbTimer::wbTimer()
     {
-    private:
-        double        timerResolution;
-        LARGE_INTEGER startTime;
-        LARGE_INTEGER endTime;
+        LARGE_INTEGER freq;
+        QueryPerformanceFrequency(&freq);
+        timerResolution = 1.0 / freq.QuadPart;
+    }
 
-    public:
-        wbTimer::wbTimer()
-        {
-            LARGE_INTEGER freq;
-            QueryPerformanceFrequency(&freq);
-            timerResolution = 1.0 / freq.QuadPart;
-        }
+    void start()
+    {
+        wbTimerDeviceSynchronize();
+        QueryPerformanceCounter(&startTime);
+    }
 
-        void start()
-        {
-            wbTimerDeviceSynchronize();
-            QueryPerformanceCounter(&startTime);
-        }
+    void stop()
+    {
+        wbTimerDeviceSynchronize();
+        QueryPerformanceCounter(&endTime);
+    }
 
-        void stop()
-        {
-            wbTimerDeviceSynchronize();
-            QueryPerformanceCounter(&endTime);
-        }
-
-        double value()
-        {
-            return (endTime.QuadPart - startTime.QuadPart) * timerResolution;
-        }
-    };
+    double value()
+    {
+        return (endTime.QuadPart - startTime.QuadPart) * timerResolution;
+    }
+};
 #elif defined(__APPLE__)
-    #include <mach/mach_time.h>
+#include <mach/mach_time.h>
 
-    class wbTimer
+class wbTimer
+{
+  private:
+    uint64_t startTime;
+    uint64_t endTime;
+
+  public:
+    void start()
     {
-    private:
-        uint64_t startTime;
-        uint64_t endTime;
+        wbTimerDeviceSynchronize();
+        startTime = mach_absolute_time();
+    }
 
-    public:
-        void start()
-        {
-            wbTimerDeviceSynchronize();
-            startTime = mach_absolute_time();
-        }
+    void stop()
+    {
+        wbTimerDeviceSynchronize();
+        endTime = mach_absolute_time();
+    }
 
-        void stop()
-        {
-            wbTimerDeviceSynchronize();
-            endTime = mach_absolute_time();
-        }
+    double value()
+    {
+        static mach_timebase_info_data_t tb;
 
-        double value()
-        {
-            static mach_timebase_info_data_t tb;
+        if (0 == tb.denom)
+            (void)mach_timebase_info(&tb); // Calculate ratio of mach_absolute_time ticks to nanoseconds
 
-            if (0 == tb.denom)
-                (void) mach_timebase_info(&tb); // Calculate ratio of mach_absolute_time ticks to nanoseconds
-
-            return ((double) endTime - startTime) * (tb.numer / tb.denom) / NSEC_PER_SEC;
-        }
-    };
+        return ((double)endTime - startTime) * (tb.numer / tb.denom) / NSEC_PER_SEC;
+    }
+};
 #else
-    #if defined(_POSIX_TIMERS) && _POSIX_TIMERS > 0
-        #include <time.h>
-    #else
-        #include <sys/time.h>
-    #endif
+#if defined(_POSIX_TIMERS) && _POSIX_TIMERS > 0
+#include <time.h>
+#else
+#include <sys/time.h>
+#endif
 
-    #if !defined(NSEC_PER_SEC)
-        #define NSEC_PER_SEC 1e9L
-    #endif
-    #if !defined(MSEC_PER_NSEC)
-        #define MSEC_PER_NSEC (NSEC_PER_SEC / CLOCKS_PER_SEC)
-    #endif
+#if !defined(NSEC_PER_SEC)
+#define NSEC_PER_SEC 1e9L
+#endif
+#if !defined(MSEC_PER_NSEC)
+#define MSEC_PER_NSEC (NSEC_PER_SEC / CLOCKS_PER_SEC)
+#endif
 
-    class wbTimer
+class wbTimer
+{
+  private:
+    long startTime;
+    long endTime;
+
+    long getTime()
     {
-    private:
-        long startTime;
-        long endTime;
+        long time;
+#if defined(_POSIX_TIMERS) && _POSIX_TIMERS > 0
+        struct timespec ts;
 
-        long getTime()
+        if (0 == clock_gettime(CLOCK_MONOTONIC, &ts))
         {
-            long time;
-        #if defined(_POSIX_TIMERS) && _POSIX_TIMERS > 0
-            struct timespec ts;
-
-            if (0 == clock_gettime(CLOCK_MONOTONIC, &ts))
-            {
-                time  = NSEC_PER_SEC;
-                time *= ts.tv_sec;
-                time += ts.tv_nsec;
-            }
-        #else
-            struct timeval tv;
-
-            if (0 == gettimeofday(&tv, NULL))
-            {
-                time  = NSEC_PER_SEC;
-                time *= tv.tv_sec;
-                time += tv.tv_usec * MSEC_PER_NSEC;
-            }
-        #endif
-            return time;
+            time = NSEC_PER_SEC;
+            time *= ts.tv_sec;
+            time += ts.tv_nsec;
         }
+#else
+        struct timeval tv;
 
-    public:
-        void start()
+        if (0 == gettimeofday(&tv, NULL))
         {
-            wbTimerDeviceSynchronize();
-            startTime = getTime();
+            time = NSEC_PER_SEC;
+            time *= tv.tv_sec;
+            time += tv.tv_usec * MSEC_PER_NSEC;
         }
+#endif
+        return time;
+    }
 
-        void stop()
-        {
-            wbTimerDeviceSynchronize();
-            endTime = getTime();
-        }
+  public:
+    void start()
+    {
+        wbTimerDeviceSynchronize();
+        startTime = getTime();
+    }
 
-        double value()
-        {
-            return ((double) endTime - startTime) / NSEC_PER_SEC;
-        }
-    };
+    void stop()
+    {
+        wbTimerDeviceSynchronize();
+        endTime = getTime();
+    }
+
+    double value()
+    {
+        return ((double)endTime - startTime) / NSEC_PER_SEC;
+    }
+};
 #endif
 } // namespace wbInternal
 
@@ -879,35 +905,35 @@ enum wbTimeType
 
 namespace wbInternal
 {
-    const char* wbTimeTypeStr[] =
+const char *wbTimeTypeStr[] =
     {
         "Generic",
         "GPU    ",
         "Compute",
         "Copy   ",
         "***InvalidTimeType***", // Keep this at the end
-    };
+};
 
-    const char* wbTimeTypeToStr(const wbTimeType timeType)
+const char *wbTimeTypeToStr(const wbTimeType timeType)
+{
+    return wbTimeTypeStr[timeType];
+}
+
+struct wbTimerInfo
+{
+    wbTimeType type;
+    std::string message;
+    wbTimer timer;
+
+    bool operator==(const wbTimerInfo &t2) const
     {
-        return wbTimeTypeStr[timeType];
+        return (type == t2.type && (0 == message.compare(t2.message)));
     }
+};
 
-    struct wbTimerInfo
-    {
-        wbTimeType  type;
-        std::string message;
-        wbTimer     timer;
+typedef std::list<wbTimerInfo> wbTimerInfoList;
 
-        bool operator==(const wbTimerInfo& t2) const
-        {
-            return (type == t2.type && (0 == message.compare(t2.message)));
-        }
-    };
-
-    typedef std::list<wbTimerInfo> wbTimerInfoList;
-
-    wbTimerInfoList timerInfoList;
+wbTimerInfoList timerInfoList;
 } // namespace wbInternal
 
 void wbTime_start(const wbTimeType timeType, const std::string timeMessage)
@@ -917,7 +943,7 @@ void wbTime_start(const wbTimeType timeType, const std::string timeMessage)
     wbInternal::wbTimer timer;
     timer.start();
 
-    wbInternal::wbTimerInfo timerInfo = { timeType, timeMessage, timer };
+    wbInternal::wbTimerInfo timerInfo = {timeType, timeMessage, timer};
 
     wbInternal::timerInfoList.push_front(timerInfo);
 }
@@ -926,16 +952,16 @@ void wbTime_stop(const wbTimeType timeType, const std::string timeMessage)
 {
     wbAssert(timeType >= Generic && timeType < wbTimeTypeINVALID, "Unrecognized wbTimeType value");
 
-    const wbInternal::wbTimerInfo searchInfo = { timeType, timeMessage, wbInternal::wbTimer() };
+    const wbInternal::wbTimerInfo searchInfo = {timeType, timeMessage, wbInternal::wbTimer()};
     const wbInternal::wbTimerInfoList::iterator iter = std::find(wbInternal::timerInfoList.begin(), wbInternal::timerInfoList.end(), searchInfo);
 
-    wbInternal::wbTimerInfo& timerInfo = *iter;
+    wbInternal::wbTimerInfo &timerInfo = *iter;
 
     wbAssert(searchInfo == timerInfo, "Could not find a corresponding wbTimerInfo struct registered by wbTime_start()");
 
     timerInfo.timer.stop();
 
-    std::cout << "[" << wbInternal::wbTimeTypeToStr( timerInfo.type ) << "] ";
+    std::cout << "[" << wbInternal::wbTimeTypeToStr(timerInfo.type) << "] ";
     std::cout << std::fixed << std::setprecision(9) << timerInfo.timer.value() << " ";
     std::cout << timerInfo.message << std::endl;
 
@@ -948,26 +974,30 @@ void wbTime_stop(const wbTimeType timeType, const std::string timeMessage)
 
 namespace wbInternal
 {
-    bool wbFPCloseEnough(const float u, const float v)
-    {
-        // Note that the tolerance level, e, is still an arbitrarily chosen value. Ideally, this value should scale
-        // std::numeric_limits<float>::epsilon() by the number of rounding operations
-        const float e = 0.0005f;
+bool wbFPCloseEnough(const float u, const float v)
+{
+    // Note that the tolerance level, e, is still an arbitrarily chosen value. Ideally, this value should scale
+    // std::numeric_limits<float>::epsilon() by the number of rounding operations
+    const float e = 0.0005f;
 
-        // For floating point values u and v with tolerance e:
-        //   |u - v| / |u| <= e || |u - v| / |v| <= e
-        // defines a 'close enough' relationship between u and v that scales for magnitude
-        // See Knuth, Seminumerical Algorithms 3e, s. 4.2.4, pp. 213-225
-        return ((fabs(u - v) / fabs(u == 0.0f ? 1.0f : u) <= e) || (fabs(u - v) / fabs(v == 0.0f ? 1.0f : v) <= e));
-    }
+    // For floating point values u and v with tolerance e:
+    //   |u - v| / |u| <= e || |u - v| / |v| <= e
+    // defines a 'close enough' relationship between u and v that scales for magnitude
+    // See Knuth, Seminumerical Algorithms 3e, s. 4.2.4, pp. 213-225
+    return ((fabs(u - v) / fabs(u == 0.0f ? 1.0f : u) <= e) || (fabs(u - v) / fabs(v == 0.0f ? 1.0f : v) <= e));
+}
 } // namespace wbInternal
 
 // For assignments MP1, MP4, MP5 & MP12
-template < typename T, typename S >
-void wbSolution(const wbArg_t args, const T& t, const S& s)
+template <typename T, typename S>
+void wbSolution(const wbArg_t args, const T &t, const S &s)
 {
     int solnItems;
-    float* soln = wbImport(wbArg_getInputFile(args, args.argc - 2), &solnItems);
+
+    // for (int i = 31; i < 52; i++)
+    //     std::cout << i << " " << t[i] <<std::endl;
+
+    int *soln = wbImport(wbArg_getInputFile(args, args.argc - 2), &solnItems);
 
     if (solnItems != s)
     {
@@ -1002,11 +1032,11 @@ void wbSolution(const wbArg_t args, const T& t, const S& s)
 }
 
 // For assignments MP2 & MP3
-template < typename T, typename S, typename U >
-void wbSolution(const wbArg_t& args, const T& t, const S& s, const U& u)
+template <typename T, typename S, typename U>
+void wbSolution(const wbArg_t &args, const T &t, const S &s, const U &u)
 {
     int solnRows, solnColumns;
-    float* soln = wbImport(wbArg_getInputFile(args, args.argc - 2), &solnRows, &solnColumns);
+    float *soln = wbImport(wbArg_getInputFile(args, args.argc - 2), &solnRows, &solnColumns);
 
     if (solnRows != s || solnColumns != u)
     {
@@ -1022,7 +1052,7 @@ void wbSolution(const wbArg_t& args, const T& t, const S& s, const U& u)
             for (int col = 0; col < solnColumns; ++col)
             {
                 const float expected = row * solnColumns + col + *soln;
-                const float result   = row * solnColumns + col + *t;
+                const float result = row * solnColumns + col + *t;
 
                 if (!wbInternal::wbFPCloseEnough(expected, result))
                 {
@@ -1048,34 +1078,37 @@ void wbSolution(const wbArg_t& args, const T& t, const S& s, const U& u)
 
 namespace wbInternal
 {
-    // For assignments MP6 & MP11
-    void wbImage_save(const wbImage_t& image, const wbArg_t& args, const char* fName)
+// For assignments MP6 & MP11
+void wbImage_save(const wbImage_t &image, const wbArg_t &args, const char *fName)
+{
+    std::ostringstream oss;
+    oss << "P6\n"
+        << "# Created by applying convolution " << wbArg_getInputFile(args, args.argc - 3) << "\n"
+        << image.width << " " << image.height << "\n"
+        << image.colors << "\n";
+    std::string headerStr(oss.str());
+
+    std::ofstream outFile(fName, std::ios::binary);
+    outFile.write(headerStr.c_str(), headerStr.size());
+
+    const int numElements = image.width * image.height * image.channels;
+
+    unsigned char *rawData = new unsigned char[numElements];
+
+    for (int i = 0; i < numElements; ++i)
     {
-        std::ostringstream oss;
-        oss << "P6\n" << "# Created by applying convolution " << wbArg_getInputFile(args, args.argc - 3) << "\n" << image.width << " " << image.height << "\n" << image.colors << "\n";
-        std::string headerStr(oss.str());
-
-        std::ofstream outFile(fName, std::ios::binary);
-        outFile.write(headerStr.c_str(), headerStr.size());
-
-        const int numElements = image.width * image.height * image.channels;
-
-        unsigned char* rawData = new unsigned char[numElements];
-
-        for (int i = 0; i < numElements; ++i)
-        {
-            rawData[i] = static_cast<unsigned char>(image.data[i] * wbInternal::kImageColorLimit + 0.5f);
-        }
-
-        outFile.write(reinterpret_cast<char*>(rawData), numElements);
-        outFile.close();
-
-        delete [] rawData;
+        rawData[i] = static_cast<unsigned char>(image.data[i] * wbInternal::kImageColorLimit + 0.5f);
     }
+
+    outFile.write(reinterpret_cast<char *>(rawData), numElements);
+    outFile.close();
+
+    delete[] rawData;
+}
 } // namespace wbInternal
 
 // For assignment MP6 & MP11
-void wbSolution(const wbArg_t& args, const wbImage_t& image)
+void wbSolution(const wbArg_t &args, const wbImage_t &image)
 {
     wbImage_t solnImage = wbImport(wbArg_getInputFile(args, args.argc - 2));
 
@@ -1103,7 +1136,7 @@ void wbSolution(const wbArg_t& args, const wbImage_t& image)
                     if (error > (1.0f / wbInternal::kImageColorLimit * tolerance))
                     {
                         if (errCnt < wbInternal::kErrorReportLimit)
-                            std::cout << "Image pixels do not match at position (" << j << ", " << i << ", " << k << "). [" << image.data[index] << ", " <<  solnImage.data[index] << "]\n";
+                            std::cout << "Image pixels do not match at position (" << j << ", " << i << ", " << k << "). [" << image.data[index] << ", " << solnImage.data[index] << "]\n";
 
                         ++errCnt;
                     }

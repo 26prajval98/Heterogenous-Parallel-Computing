@@ -21,7 +21,7 @@ static char *generate_data(size_t n)
 	char *data = (char *)malloc(n + 1);
 	for (unsigned int i = 0; i < n; i++)
 	{
-		data[i] = (rand() % (128 - 32)) + 32; // random printable character
+		data[i] =  (rand() % (128 - 32)) + 32; // random printable character
 	}
 	data[n] = 0; // null-terminated
 	return data;
@@ -30,7 +30,6 @@ static char *generate_data(size_t n)
 static void write_data_str(char *file_name, const char *data, int num)
 {
 	FILE *handle = fopen(file_name, "w");
-	fprintf(handle, "%d", num);
 	for (int ii = 0; ii < num; ii++)
 	{
 		fprintf(handle, "%c", *data++);
@@ -103,8 +102,8 @@ int main()
 	// create_dataset_fixed(0, "the quick brown fox jumps over the lazy dog");
 	// create_dataset_fixed(1, "gpu teaching kit - accelerated computing");
 	// create_dataset_random(2, 16);
-	// create_dataset_random(3, 513);
-	create_dataset_random(4, 511);
+	create_dataset_random(3, 513);
+	// create_dataset_random(4, 511);
 	// create_dataset_random(5, 1);
 	return 0;
 }

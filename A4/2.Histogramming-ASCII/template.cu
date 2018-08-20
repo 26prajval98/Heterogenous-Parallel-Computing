@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
 
 	wbTime_start(Generic, "Importing data and creating memory on host");
 	
-	hostInput = (int *)wbImport(wbArg_getInputFile(args, 3), &inputLength);
+	hostInput = (int *)wbImport(wbArg_getInputFile(args, 3), &inputLength, 0);
 	hostBins = (int *)malloc(NUM_BINS * sizeof(int));
 
 	for(int i=0; i < NUM_BINS; i++)
@@ -82,7 +82,7 @@ int main(int argc, char *argv[])
 	//@@ Perform kernel computation here
 
 	dim3 DimBlock(SIZE);
-	dim3 DimGrid(max((int)ceil(inputLength/SIZE), 1));
+	dim3 DimGrid(max((int)ceil((float)inputLength/SIZE), 1));
 
 	hist<<<DimGrid,DimBlock>>>(deviceInput, deviceBins, inputLength);
 
@@ -94,7 +94,6 @@ int main(int argc, char *argv[])
 	cudaMemcpy(hostInput, deviceInput, inputLength*sizeof(int), cudaMemcpyDeviceToHost);
 	cudaMemcpy(hostBins, deviceBins, NUM_BINS*sizeof(int), cudaMemcpyDeviceToHost);
 
-	CUDA_CHECK(cudaDeviceSynchronize());
 	wbTime_stop(Copy, "Copying output memory to the CPU");
 
 	wbTime_start(GPU, "Freeing GPU Memory");
@@ -107,6 +106,7 @@ int main(int argc, char *argv[])
 
 	// Verify correctness
 	// -----------------------------------------------------
+
 	wbSolution(args, hostBins, NUM_BINS);
 
 	free(hostBins);

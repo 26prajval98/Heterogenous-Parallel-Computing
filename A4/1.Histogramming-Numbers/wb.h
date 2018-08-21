@@ -479,38 +479,38 @@ void wbImage_save(wbImage_t &image, const char outputfile[])
 
 void wbSolution(wbArg_t arg, wbImage_t image)
 {
-    // const char buf[] = "test.raw";
-    // wbImage_save(image, buf);
-    // char* solutionFile = wbArg_getInputFile(arg, arg.argc-2);
-    // wbImage_t solutionImage = wbImport(solutionFile);
-    // if (image._imageWidth != solutionImage._imageWidth) {
-    //     std::cout << "width is incorrect: expected " << solutionImage._imageWidth << " but got " << image._imageWidth << std::endl;
-    //     exit(1);
-    // }
-    // if (image._imageHeight != solutionImage._imageHeight) {
-    //    std::cout << "height is incorrect: expected " << solutionImage._imageHeight << " but got " << image._imageHeight << std::endl;
-    //    exit(1);
-    // }
-    // int channels = 3;
-    // for (int i = 0; i < image._imageWidth; ++i)
-    //     for (int j = 0; j < image._imageHeight; ++j)
-    //         for (int k = 0; k < 3; ++k) {
-    //             int index = ( j*image._imageWidth + i )*channels + k;
+    const char buf[] = "test.raw";
+    wbImage_save(image, buf);
+    char* solutionFile = wbArg_getInputFile(arg, arg.argc-2);
+    wbImage_t solutionImage = wbImport(solutionFile);
+    if (image._imageWidth != solutionImage._imageWidth) {
+        std::cout << "width is incorrect: expected " << solutionImage._imageWidth << " but got " << image._imageWidth << std::endl;
+        exit(1);
+    }
+    if (image._imageHeight != solutionImage._imageHeight) {
+       std::cout << "height is incorrect: expected " << solutionImage._imageHeight << " but got " << image._imageHeight << std::endl;
+       exit(1);
+    }
+    int channels = 3;
+    for (int i = 0; i < image._imageWidth; ++i)
+        for (int j = 0; j < image._imageHeight; ++j)
+            for (int k = 0; k < 3; ++k) {
+                int index = ( j*image._imageWidth + i )*channels + k;
 
-    // 	 double scaled = ((double)image._data[index])*255.0f;
-    // 	 double decimalPart = scaled - floor(scaled);
-    // 	 //if true, don't know how to round, too close to xxx.5
-    // 	 bool ambiguous = fabs(decimalPart - 0.5) < 0.0001;
+    	 double scaled = ((double)image._data[index])*255.0f;
+    	 double decimalPart = scaled - floor(scaled);
+    	 //if true, don't know how to round, too close to xxx.5
+    	 bool ambiguous = fabs(decimalPart - 0.5) < 0.0001;
 
-    // 	 int colorValue = int(((double)image._data[index])*255.0f +0.5);
-    // 	 double error = abs(colorValue - solutionImage._rawData[index]);
-    // 	 if (!(error == 0) && !(ambiguous && error <= 1) ) {
-    //                 std::cout << "data in position [" << i << " " << j << " " << k << "]  (array index: " << index << ") is wrong, expected " <<  (int)solutionImage._rawData[index] << " but got " << colorValue << "  (float value is " << image._data[index] << ")" <<std::endl;
-    // 	     std::cout << "decimalPart: " << decimalPart << ", ambiguous: " << ambiguous << std::endl;
-    //                 exit(1);
-    //             }
-    //         }
-    std::cout << "Solution is correct!" << std::endl;
+    	 int colorValue = int(((double)image._data[index])*255.0f +0.5);
+    	 double error = abs(colorValue - solutionImage._rawData[index]);
+    	 if (!(error == 0) && !(ambiguous && error <= 1) ) {
+                    std::cout << "data in position [" << i << " " << j << " " << k << "]  (array index: " << index << ") is wrong, expected " <<  (int)solutionImage._rawData[index] << " but got " << colorValue << "  (float value is " << image._data[index] << ")" <<std::endl;
+    	     std::cout << "decimalPart: " << decimalPart << ", ambiguous: " << ambiguous << std::endl;
+                    exit(1);
+                }
+            }
+    //std::cout << "Solution is correct!" << std::endl;
 }
 
 //

@@ -1,4 +1,6 @@
-#include "wb.h"
+#include <iostream>
+#include <stdlib.h>
+#include <stdio.h>
 
 #define MAX_VAL 255
 #define MIN_VAL 34

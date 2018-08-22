@@ -25,9 +25,26 @@ inline void gpuAssert(cudaError_t code, const char *file, int line,
 __global__ void hist(int *d_ip, int *d_bin, int inputLength)
 {
 	int idx = blockIdx.x*blockDim.x + threadIdx.x;
+	int x = threadIdx.x;
+	int d = blockDim.x;
 
-	if(idx < inputLength)
-		atomicAdd(&d_bin[d_ip[idx]], 1);
+	__shared__ int buff[NUM_BINS];
+
+	for(int i=0; i<NUM_BINS; i++)
+		buff[i] = 0;
+	__syncthreads();
+
+	if(idx < inputLength){
+		atomicAdd(&buff[d_ip[idx]], 1);
+	}
+	__syncthreads();
+	
+	atomicAdd(&d_bin[x], buff[x]);
+	atomicAdd(&d_bin[d + x], buff[d + x]);
+	atomicAdd(&d_bin[2*d + x], buff[2*d + x]);
+	atomicAdd(&d_bin[3*d + x], buff[3*d + x]);
+
+	__syncthreads();
 }
 
 __global__ void saturate(int * d_bin)
@@ -98,7 +115,7 @@ int main(int argc, char *argv[])
 	cudaMemcpy(hostInput, deviceInput, inputLength * sizeof(int), cudaMemcpyDeviceToHost);
 	cudaMemcpy(hostBins, deviceBins, NUM_BINS * sizeof(int), cudaMemcpyDeviceToHost);
 
-	CUDA_CHECK(cudaDeviceSynchronize());
+	// CUDA_CHECK(cudaDeviceSynchronize());
 	wbTime_stop(Copy, "Copying output memory to the CPU");
 
 	wbTime_start(GPU, "Freeing GPU Memory");

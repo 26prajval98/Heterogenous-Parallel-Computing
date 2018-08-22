@@ -73,6 +73,6 @@ int main()
 	// create_dataset(2, 513, NUM_BINS);
 	// create_dataset(3, 511, NUM_BINS);
 	// create_dataset(4, 1, NUM_BINS);
-	create_dataset(5, 500000, NUM_BINS);
+	create_dataset(5, 50000, NUM_BINS);
 	return 0;
 }

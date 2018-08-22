@@ -1,134 +1,154 @@
-#include "wb.h"
+#include<stdio.h>
+#include<stdlib.h>
+#include<math.h>
+#include<time.h>
 
+__global__ void Convolution(int*,const int*,int*,int,int);
+bool CheckAnswer(int*,int*,int*,int,int);
 
-#define wbCheck(stmt)                                                     \
-  do {                                                                    \
-    cudaError_t err = stmt;                                               \
-    if (err != cudaSuccess) {                                             \
-      wbLog(ERROR, "Failed to run stmt ", #stmt);                         \
-      return -1;                                                          \
-    }                                                                     \
-  } while (0)
+#define TW 32
+#define MaskWidth 5
+#define MaskRadius 2
 
-#define Mask_width 5
-#define Mask_radius Mask_width / 2
-#define SIZE 16
-#define w (SIZE + Mask_width - 1)
-#define clamp(x) (min(max((x), 0.0), 1.0))
+int main()
+{	
+	clock_t start_overhead,end_overhead;
+	start_overhead=clock();
+	
+    /* No. of rows and column in the image*/
+	int nImageROW=800;
+	int nImageCOL=800;
+	
+	/* Dynamically allocate memory to the input image, output image and the mask. Each matrix is represented as a 1D array*/
+	int* ImageIn=new int[nImageROW*nImageCOL];
+	int* ImageOut=new int[nImageROW*nImageCOL];
+	int* Mask=new int[MaskWidth*MaskWidth];
+	
+	srand(time(NULL));
+	
+	/* Populate the input image and the mask with random numbers*/
+	for(int i=0;i<nImageROW;i++)
+	for(int j=0;j<nImageCOL;j++)
+	ImageIn[i*nImageCOL+j]=rand()%4;
 
-__global__ void convolution(float* deviceInputImageData,float* deviceMaskData,float* deviceOutputImageData,int imageChannels,int imageWidth,int imageHeight)
-{
-  int i = blockDim.x * blockIdx.x + threadIdx.x;
-  int j = blockDim.y * blockIdx.y + threadIdx.y; 
-  int k ;
-  for(k=0;k<imageChannels;k++)
-  {
-    float accum  = 0;
-    for(int y = -Mask_radius; y< Mask_radius ; y++)
-    {
-      for(int x = -Mask_radius; x< Mask_radius ; x++)
-      {
-        int xOff = j+x;
-        int yOff = i+y;
-        if(xOff >=0 && xOff< imageWidth && yOff >=0 && yOff <imageHeight)
-        {
-          int temp = deviceInputImageData[(yOff*imageWidth + xOff)*imageChannels +  k];
-          int temp1 = deviceMaskData[(y+Mask_radius)*Mask_width+x+Mask_radius];
-          accum += temp*temp1;
-        }
-      }
-    }
-    deviceOutputImageData[(i*imageWidth+j)*imageChannels + k] = clamp(accum);
-  }
+	for(int i=0;i<MaskWidth;i++)
+	for(int j=0;j<MaskWidth;j++)
+	Mask[i*MaskWidth+j]=rand()%5;
+  
+	int ImageSize=nImageROW*nImageCOL*sizeof(int);
+	int MaskSize=MaskWidth*MaskWidth*sizeof(int);
+	
+	
+	int* ImageIn_d, *ImageOut_d,*Mask_d;
+	
+	/* Allocate memory on the device*/
+	
+	cudaMalloc((void**)&ImageIn_d,ImageSize);
+	cudaMalloc((void**)&ImageOut_d,ImageSize);
+	cudaMalloc((void**)&Mask_d,MaskSize);
+	
+	/* Copy data from host to device*/
+	cudaMemcpy(ImageIn_d,ImageIn,ImageSize,cudaMemcpyHostToDevice);
+	cudaMemcpy(Mask_d,Mask,MaskSize,cudaMemcpyHostToDevice);
+	
+	/* Invoke the convolution kernel*/
+	dim3 dimBlock(TW,TW);
+	dim3 dimGrid(ceil((float)nImageCOL/TW),ceil((float)nImageROW/TW));
+	
+	clock_t start,end,total;
+	start=clock();
+	
+	Convolution<<<dimGrid,dimBlock>>>(ImageIn_d,Mask_d,ImageOut_d,nImageROW,nImageCOL);
+	
+	end=clock();
+	total=(double)(end - start) / CLOCKS_PER_SEC;
+	printf("Time taken on device: %ld\n",total);
+	
+	/* Copy the convoluted image to host*/
+	cudaMemcpy(ImageOut,ImageOut_d,ImageSize,cudaMemcpyDeviceToHost);
+	
+	end_overhead=clock();
+	
+	if(CheckAnswer(ImageIn,Mask,ImageOut,nImageROW,nImageCOL))
+	printf("Solution is right!\n");
+    else
+	printf("Solution is wrong!\n");
+	
+	printf("Time spent on overhead calculations: %lf\n",(double)(end_overhead - start_overhead) / CLOCKS_PER_SEC);
+	
+	cudaFree(ImageIn);
+	cudaFree(ImageOut);
+	cudaFree(Mask);	
 }
 
-int main(int argc, char *argv[]) {
-  wbArg_t arg;
-  int maskRows;
-  int maskColumns;
-  int imageChannels;
-  int imageWidth;
-  int imageHeight;
-  char *inputImageFile;
-  char *inputMaskFile;
-  wbImage_t inputImage;
-  wbImage_t outputImage;
-  float *hostInputImageData;
-  float *hostOutputImageData;
-  float *hostMaskData;
-  float *deviceInputImageData;
-  float *deviceOutputImageData;
-  float *deviceMaskData;
+__global__ void Convolution(int* ImageIn_d, const int* __restrict__ Mask_d,int* ImageOut_d, int nImageROW, int nImageCOL)
+{
+	/* Store the thread dimensions on registers*/
+	int bx=blockIdx.x,by=blockIdx.y;
+	int tx=threadIdx.x,ty=threadIdx.y;
+	
+	/* Declare a shared memory region for each block of threads*/
+	__shared__ int SharedMemBlock[TW][TW];
+	
+	/* Find out the row and column for each thread*/
+	int row=by*blockDim.y+ty;
+	int col=bx*blockDim.x+tx;
 
-  arg = wbArg_read(argc, argv); /* parse the input arguments */
+	SharedMemBlock[ty][tx]=ImageIn_d[row*nImageCOL+col];
+    __syncthreads();
 
-  inputImageFile = wbArg_getInputFile(arg, 0);
-  inputMaskFile  = wbArg_getInputFile(arg, 1);
+	int Pvalue=0;
+	for(int i=-MaskRadius;i<=MaskRadius;i++)
+	for(int j=-MaskRadius;j<=MaskRadius;j++)
+	{
+		int GloabalMemRow=row+i;
+		int GloabalMemCol=col+j;
+		
+		int SharedMemRow=ty+i;
+		int SharedMemCol=tx+j;
+		
+		int MaskRow=MaskRadius+i;
+		int MaskCol=MaskRadius+j;
+		
+		if(GloabalMemRow<by*TW || GloabalMemRow>=(by+1)*TW||GloabalMemCol<bx*TW || GloabalMemCol>=(bx+1)*TW)
+		{
+			if(GloabalMemRow>=0 && GloabalMemRow<nImageROW && GloabalMemCol>=0 && GloabalMemCol<nImageCOL)
+			Pvalue+=ImageIn_d[GloabalMemRow*nImageCOL+GloabalMemCol]*Mask_d[MaskRow*MaskWidth+MaskCol];
+			
+		}
+		else
+		Pvalue+=SharedMemBlock[SharedMemRow][SharedMemCol]*Mask_d[MaskRow*MaskWidth+MaskCol];
+	}
+	ImageOut_d[row*nImageCOL+col]=Pvalue;
+}
 
-  inputImage   = wbImport(inputImageFile);
-  hostMaskData = (float *)wbImport(inputMaskFile, &maskRows, &maskColumns);
+/* A function to verify correctness of solution*/
+bool CheckAnswer(int* ImageIn, int* Mask, int* ImageOut,int nImageROW, int nImageCOL)
+{
+	clock_t start,end;
+	start=clock();
+	for(int row=0;row<nImageROW;row++)
+	{
+		for(int col=0;col<nImageCOL;col++)
+		{
+			int Pvalue=0;
+			for(int MaskRow=-MaskRadius;MaskRow<=MaskRadius;MaskRow++)
+			{
+				for(int MaskCol=-MaskRadius;MaskCol<=MaskRadius;MaskCol++)
+				{
+					int imageRow=row+MaskRow;
+					int imageCol=col+MaskCol;
+					
+					if(imageRow>=0 && imageRow<nImageROW && imageCol>=0 && imageCol<nImageCOL)
+					Pvalue+=ImageIn[imageRow*nImageCOL+imageCol]*Mask[(MaskRow+MaskRadius)*MaskWidth+(MaskCol+MaskRadius)];
+				}
+			}
+			if(Pvalue!=ImageOut[row*nImageCOL+col])
+			return false;
+		}
+	}
+	end=clock();
+	printf("Time taken on host: %lf\n",(double)(end - start) / CLOCKS_PER_SEC);
+	return true;
 
-  assert(maskRows == 5);    /* mask height is fixed to 5 in this mp */
-  assert(maskColumns == 5); /* mask width is fixed to 5 in this mp */
-
-  imageWidth    = wbImage_getWidth(inputImage);
-  imageHeight   = wbImage_getHeight(inputImage);
-  imageChannels = wbImage_getChannels(inputImage);
-
-  outputImage = wbImage_new(imageWidth, imageHeight, imageChannels);
-
-  hostInputImageData  = wbImage_getData(inputImage);
-  hostOutputImageData = wbImage_getData(outputImage);
-
-  wbTime_start(GPU, "Doing GPU Computation (memory + compute)");
-
-  wbTime_start(GPU, "Doing GPU memory allocation");
-  
-  cudaMalloc((void **) deviceInputImageData,imageWidth * imageHeight * imageChannels * sizeof(float));                    //1.Allocate device memory
-  cudaMalloc((void **) deviceMaskData,sizeof(hostMaskData));
-  cudaMalloc((void **) deviceOutputImageData,sizeof(hostOutputImageData));
-  // cudaMalloc((void **) imageChannels,sizeof(int));
-  // cudaMalloc((void **) imageHeight, sizeof(int));
-  // cudaMalloc((void **) imageWidth,sizeof(int));
-
-  wbTime_stop(GPU, "Doing GPU memory allocation");
-
-  wbTime_start(Copy, "Copying data to the GPU");
-
-  cudaMemcpy(deviceInputImageData,hostInputImageData,imageWidth * imageHeight * imageChannels * sizeof(float),cudaMemcpyHostToDevice);   // 2.Copt host to device
-  cudaMemcpy(deviceMaskData,hostMaskData,sizeof(hostMaskData),cudaMemcpyHostToDevice);
-
-  // cudaMemcpy(,cudaMemcpyHostToDevice);
-  // cudaMemcpy(,cudaMemcpyHostToDevice);
-  // cudaMemcpy(,cudaMemcpyHostToDevice);
-
-  wbTime_stop(Copy, "Copying data to the GPU");
-
-  wbTime_start(Compute, "Doing the computation on the GPU");
-  
-  dim3 dimBlock(SIZE);                                                                  //3.inititalise thread block and grid dimensions
-  dim3 dimGrid(ceil(imageHeight/SIZE),ceil(imageWidth/SIZE),1);
-
-  convolution<<<dimGrid, dimBlock>>>(deviceInputImageData, deviceMaskData,              //4.Invoke CUDA kernel
-                                     deviceOutputImageData, imageChannels,
-                                     imageWidth, imageHeight);
-  wbTime_stop(Compute, "Doing the computation on the GPU");
-
-  wbTime_start(Copy, "Copying data from the GPU");
- 
-  cudaMemcpy(hostOutputImageData, deviceOutputImageData,imageWidth * imageHeight * imageChannels * sizeof(float),cudaMemcpyDeviceToHost); //5. Copy results
-        
-  wbTime_stop(Copy, "Copying data from the GPU");
-
-  wbTime_stop(GPU, "Doing GPU Computation (memory + compute)");
-
-  wbSolution(arg, outputImage);
-
-  //@@ Insert code here
-
-  free(hostMaskData);                    //6. Free device memory
-  wbImage_delete(outputImage);
-  wbImage_delete(inputImage);
-
-  return 0;
 }

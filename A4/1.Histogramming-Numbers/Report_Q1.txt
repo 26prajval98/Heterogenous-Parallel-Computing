@@ -1,19 +1,30 @@
 Questions.
 1.   Describe all optimizations you tried regardless of whether you committed to them or abandoned them and whether they improved or hurt performance.
-Ans. Optimizations tried was using multiple threads to simultaneously count the number of elements present in the array. This had to be abandoned because this doesnt
-     ensure atomicity of the threads and can lead to wrong calculations. Thus we ended up using *atommicAdd* to histogram the data.
+Ans. Unoptimsed code (unoptimsed.cu) : Using atomicAdd (0.0371s compute time)
+     
+     Optimised code (template.cu) : Creating local histogram for each block of threads to reduce the global memory traffic. The gpu used for computing was 
+     Nvidia GTX 1060 which is based on Pascal architecture. The shared atomics histogram implementation is almost 2x faster than the global atomics version on Maxwell 
+     than Kepler. And in Pascal it is even more better. Hence much higher speeds is acheived. Also this optimised code is well known as fast histogramming.
+     However this optimisation does not lead to a better performance as the repeated number of characters in each block will be very less when number 
+     of bins are 4096. (0.0371s compute time)
+
+     In this case Unoptimised and Optimised will give comparable compute time. So the optimised code does not provide any considerable optimisations.
 
 2.   Were there any difficulties you had with completing the optimization correctly.
 Ans. No.
 
 3.   Which optimizations gave the most benifit?
-Ans. atomicAdd gave the correct results.
+Ans. The data set here has a size less 48kb which is sufficient to be held in the shared memory. So using shared memeory is possible. 
+     Shared memory within a block has really low access time. This gave the most optimisation. However, for larger dimensions, the data needs
+     to be stored in the global memory. Thus, the maximum optimisation is given by ensuring that the SMs are fully occupied so that they can hide 
+     latency. However if the shared memory is fully occupied then global memory will be allocated hence no optimisation.
 
 4.   For the histogram kernel, how many global memory reads are being performed by your kernel? explain.
-Ans. Number of global memory reads are equal to the number of elements in the input array.
+Ans. Number of global memory reads are equal to the number of elements in the input array. Also to check saturation there is global memeory reads.
+     If that is counted 2 per thread i.e twice the number of elements in the input array.
 
 5.   For the histogram kernel, how many global memory writes are being performed by your kernel? explain.
-Ans. The number of global memory writes are equal to the number of elements in the input array.
+Ans. The number of global memory writes are equal to the number of elements in the input array. If saturation write is counted then twice.
 
 6.   For the histogram kernel, how many atomic operations are being performed by your kernel? explain.
 Ans. Every thread performs an atomicAdd, thus size of input array.
@@ -22,4 +33,4 @@ Ans. Every thread performs an atomicAdd, thus size of input array.
 Ans. Contentions by each thread to write over the same bin.
 
 8.   For the histogram kernel, what contentions would you expect if every element in the input array has a random value?
-Ans. This will increase the performance of the code as atomicity neednt be maintained and all the threads can work in parallel.
+Ans. It will be average. It will be worst if all are same values and best if all are different. Hence a tradeoff between optimised and unoptimsed.

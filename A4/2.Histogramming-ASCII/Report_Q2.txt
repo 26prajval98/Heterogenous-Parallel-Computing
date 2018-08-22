@@ -3,7 +3,7 @@ Questions.
 Ans. Nope.
 
 2.   Which optimizations gave the most benifit.
-Ans. atomicAdd 
+Ans. Creating a local histogram for each block of threads to reduce the global memory traffic gave the most optimisation.
 
 3.   For the histogram kernel, how many global memory reads are being performed by your kernel? explain.
 Ans. Number of global memory reads are equal to the number of elements in the input array.
@@ -12,10 +12,14 @@ Ans. Number of global memory reads are equal to the number of elements in the in
 Ans. The number of global memory writes are equal to the number of elements in the input array.
 
 5.   For the histogram kernel, how many atomic operations are being performed by your kernel? explain.
-Ans. Every thread performs an atomicAdd, thus size of input array.
+Ans. Every thread performs 2 atomicAdd, thus twice size of input array.
 
 6.   Most text files will consist of only letters, numbers and whitespace characters. These 95 characters
      make up fall between ASCII numbers 32 - 126. What can we say about atomic access contention if more than
      95 threads are simultaneously trying to atomically increment a private histogram?
-Ans. Atomic access leads to sequential working of threads. 95 threads contending will slow down the process 
-     and we need tofind better optimisations like having private bins for a block.
+Ans. The memory contention gets distributed between the private histogram in the shared memory and the public histogram in the global memory.
+     The number of threads contending to write over a private histogram will be limited to the number of threads per block.Thus, the data race
+     is lower. The worst case scenario is when every thread has the same data (95 threads are in contention).
+   
+     However, for the global memory write, the degree of contention is at the most equal to the number of thread blocks. 
+     This is because every thread from every block with the same thread index will acces only one element in the public histogram.

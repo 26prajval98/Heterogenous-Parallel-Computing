@@ -1,0 +1,21 @@
+Questions.
+1.   Were there any difficulties you had with completing the optimization correctly.
+Ans. Nope.
+
+2.   Which optimizations gave the most benifit.
+Ans. atomicAdd 
+
+3.   For the histogram kernel, how many global memory reads are being performed by your kernel? explain.
+Ans. Number of global memory reads are equal to the number of elements in the input array.
+
+4.   For the histogram kernel, how many global memory writes are being performed by your kernel? explain.
+Ans. The number of global memory writes are equal to the number of elements in the input array.
+
+5.   For the histogram kernel, how many atomic operations are being performed by your kernel? explain.
+Ans. Every thread performs an atomicAdd, thus size of input array.
+
+6.   Most text files will consist of only letters, numbers and whitespace characters. These 95 characters
+     make up fall between ASCII numbers 32 - 126. What can we say about atomic access contention if more than
+     95 threads are simultaneously trying to atomically increment a private histogram?
+Ans. Atomic access leads to sequential working of threads. 95 threads contending will slow down the process 
+     and we need tofind better optimisations like having private bins for a block.

@@ -5,7 +5,6 @@
 
 __global__ void Stencil(int*,int*,int,int,int);
 bool CheckAnswer(int*,int*,int,int,int);
-void printMatrix(int* mat,int,int);
 
 #define BW 8
 #define value(array, i, j, k) array[((i)*width + (j)) * depth + (k)]
@@ -73,11 +72,6 @@ int main()
 	printf("Solution is wrong!\n");
 	
 	printf("Time spent on overhead calculations: %lf\n",(double)(end_overhead - start_overhead) / CLOCKS_PER_SEC);
-	
-/* 	printMatrix(InputArray,height,width);
-	printMatrix(OutputArray,height,width);
-	printMatrix(Mask,MaskWidth,MaskWidth); */
-	
 	
 	cudaFree(InputArray);
 	cudaFree(OutputArray);
@@ -174,16 +168,4 @@ bool CheckAnswer(int* InputArray, int* OutputArray,int height, int width,int dep
 	printf("Time taken on host: %lf\n",(double)(end - start) / CLOCKS_PER_SEC);
 	return true;
 
-}
-
-void printMatrix(int* mat,int nrow,int ncol)
-{
-	for(int i=0;i<nrow;i++)
-	{
-		for(int j=0;j<ncol;j++)
-		printf("%d ",mat[i*ncol+j]);
-	    
-		printf("\n");
-	}
-	printf("\n\n");
 }

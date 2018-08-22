@@ -1,3 +1,6 @@
+SUMUKHA.PK (16CO145)
+PRAJVAL.M (16CO234)
+
 Questions
 
 1.   How many global memory reads does your program make?

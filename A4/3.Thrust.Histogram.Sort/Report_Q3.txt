@@ -1,3 +1,6 @@
+SUMUKHA.PK (16CO145)
+PRAJVAL.M (16CO234)
+
 Questions.
     
 1.   Are there places in your solution where there is an implicit memory copy between the host and device (a copy that is not from thrust::copy)?

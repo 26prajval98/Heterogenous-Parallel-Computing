@@ -1,3 +1,6 @@
+SUMUKHA.PK (16CO145)
+PRAJVAL.M (16CO234)
+
 Questions
 1.   Name 3 applications of convolution.
 Ans. Convolution is used in

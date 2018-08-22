@@ -1,3 +1,6 @@
+SUMUKHA.PK (16CO145)
+PRAJVAL.M (16CO234)
+
 Questions.
 1.   Describe all optimizations you tried regardless of whether you committed to them or abandoned them and whether they improved or hurt performance.
 Ans. Unoptimsed code (unoptimsed.cu) : Using atomicAdd (0.0371s compute time)

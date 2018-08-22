@@ -1,3 +1,6 @@
+// 16CO145 Sumukha PK
+// 16CO234 Prajval M
+
 ////
 // wb.h: Header file for Heterogeneous Parallel Programming course (Coursera)
 ////

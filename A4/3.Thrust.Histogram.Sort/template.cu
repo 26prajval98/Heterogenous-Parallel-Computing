@@ -1,3 +1,6 @@
+// 16CO145 Sumukha PK
+// 16CO234 Prajval M
+
 #include "wb.h"
 
 #include <thrust/adjacent_difference.h>

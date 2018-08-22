@@ -1,7 +1,7 @@
 #include "wb.h"
 
 #define NUM_BINS 128
-#define SIZE 16
+#define SIZE 128
 
 
 #define CUDA_CHECK(ans)                       \
@@ -25,10 +25,20 @@ inline void gpuAssert(cudaError_t code, const char *file, int line,
 
 __global__ void hist(int * d_ip, int * d_b, int l) 
 {	
+
 	int idx = blockDim.x * blockIdx.x + threadIdx.x;
+	int x = threadIdx.x;
+	__shared__ int buff[NUM_BINS];
+
+	for(int i=0; i<NUM_BINS;i++) 
+		buff[i] = 0;
+	__syncthreads();
 
 	if(idx < l)
-		atomicAdd(&d_b[d_ip[idx]], 1);
+		atomicAdd(&buff[d_ip[idx]], 1);
+	__syncthreads();
+
+	atomicAdd(&d_b[x], buff[x]);
 }
 
 

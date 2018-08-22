@@ -1,0 +1,12 @@
+Questions
+
+1.   How many global memory reads does your program make?
+Ans. Each thread performs atleast 1 (to load the corresponding element into shared memory) and atmost 4 global memory reads (The other three global memory 
+     reads is for the corner elements)
+
+2.   How many shared memory reads does your program make?
+Ans. Each thread performs atleast 3 (in the case of corner elements) and atmost 6 shared memory reads (for those well within the shared memory)
+
+4.   Does your stencil make more, equal, or fewer memory accesses than the equivalent 3x3 convolution code would?
+Ans. The minimum dimensions for a 3D mask is (3,3,3). The number of floating point operations each thread will perform will be approximately 27, 
+     which is much higher than the 7 floating point operations performed by each thread for a stencil.

@@ -1,0 +1,64 @@
+Questions
+1.   Name 3 applications of convolution.
+Ans. Convolution is used in
+   - Image processing for edge detection, blur filters, smoothing etc.
+   - In statistics, to calculate weighted moving average
+   - In probability theory where the probability distribution 
+     of the sum of two independent random variables is the convolution of their individual distributions.
+
+2.   How many floating operations are being performed in your convolution kernel? explain.
+Ans. imageHeight*width*channels*5*5 (5 is the maskRadius)
+
+3.   How many global memory reads are being performed by your kernel? explain.
+Ans. Number of global memory reads is the total number of pixels in the mask and the image.
+
+4.   How many global memory writes are being performed by your kernel? explain.
+Ans. Size of the output image pixels is the numberof global memory writes.
+
+5.   What is the minimum, maximum, and average number of real operations that a thread will perform? Real operations 
+     are those that directly contribute to the final output value.
+Ans.  Minimum: (MaskWidth * MaskWidth)/4 (by the elements at the corners of the image)
+      Maximum: (MaskWidth * MaskWidth) number of operations per thread
+      Average: No. of elements entirely within the image: (ROWS-2)*(COLS-2)
+            
+            No of elements at the boundary: (2*(ROW+COL)) - 4
+			
+			(ROWS-2)*(COLS-2)*(MaskWidth*MaskWidth)+ (2*(ROW+COL)-4)*(MaskWidth*MaskWidth)/4
+			--------------------------------------------------------------------------------
+			            						ROW*COL
+											
+											
+	If ROW=COL=800, MaskWidth=5
+	
+	Minimum: 25/4 ~ 6
+	Maximum: 25
+    Average: 24.9
+
+6.   What is the measured floating-point computation rate for the CPU and GPU kernels in this application? How do they each scale with the size of the input?
+Ans. As tested for an 8000 x 8000 matrix in the program, the time taken on device is nearly 0.0000s (the C clock function cannot measure
+     greater precision). Time taken on the host is 2.87 seconds. The time taken on the host increases much faster than the time 
+     taken on the GPU (it is O(n*n*n*n) for the host!)
+
+7.   How much time is spent as an overhead cost for using the GPU for computation? Consider all code executed within your host 
+     function with the exception of the kernel itself, as overhead. How does the overhead scale with the size of the input?
+Ans. Time taken for overhead calculations: 1.7 seconds. The time taken for memory allocation and copying is a function of O(n*n)
+
+8.   What do you think happens as you increase the mask size (say to 1024) while you set the block dimensions to 16x16? What do you end up
+     spending most of your time doing? Does that put other constraints on the way you’d write your algorithm (think of the shared/constant memory size)?
+Ans. As the mask size increases, the number of global memory access will keep increasing, thus eating away the advantage of using a shared memory.
+     Also, since the size of const memory is limited, large sized masks cannot be accommodated in the const memory. They will have to shift to 
+     global memory.
+
+9.   Do you have to have a separate output memory buffer? Put it in another way, why can’t you perform the convolution in place?
+Ans. The convolution cannot run in-place because:
+       - Not all thread blocks read in the data elements at the exact same time.
+       - If it were in place, the values of the elements keep getting changed as and when a thread has finished doing its computation
+       - A thread can therefore read in an ouptut value instead of the input value if the output is dumped before input is taken
+
+10.  What is the identity mask?
+Ans. A mask in which only the central element is 1 and all other elements is 0 is called an identity mask
+     Eg: 3 X 3 identity mask 
+	
+        0 0 0
+    	0 1 0
+        0 0 0

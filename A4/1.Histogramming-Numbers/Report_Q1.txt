@@ -1,0 +1,25 @@
+Questions.
+1.   Describe all optimizations you tried regardless of whether you committed to them or abandoned them and whether they improved or hurt performance.
+Ans. Optimizations tried was using multiple threads to simultaneously count the number of elements present in the array. This had to be abandoned because this doesnt
+     ensure atomicity of the threads and can lead to wrong calculations. Thus we ended up using *atommicAdd* to histogram the data.
+
+2.   Were there any difficulties you had with completing the optimization correctly.
+Ans. No.
+
+3.   Which optimizations gave the most benifit?
+Ans. atomicAdd gave the correct results.
+
+4.   For the histogram kernel, how many global memory reads are being performed by your kernel? explain.
+Ans. Number of global memory reads are equal to the number of elements in the input array.
+
+5.   For the histogram kernel, how many global memory writes are being performed by your kernel? explain.
+Ans. The number of global memory writes are equal to the number of elements in the input array.
+
+6.   For the histogram kernel, how many atomic operations are being performed by your kernel? explain.
+Ans. Every thread performs an atomicAdd, thus size of input array.
+
+7.   For the histogram kernel, what contentions would you expect if every element in the array has the same value?
+Ans. Contentions by each thread to write over the same bin.
+
+8.   For the histogram kernel, what contentions would you expect if every element in the input array has a random value?
+Ans. This will increase the performance of the code as atomicity neednt be maintained and all the threads can work in parallel.

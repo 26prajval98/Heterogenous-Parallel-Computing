@@ -1,7 +1,3 @@
-// openmp.cpp : Defines the entry point for the console application.
-//
-
-#include "stdafx.h"
 #include "omp.h"
 #include <stdio.h>
 #include <time.h>

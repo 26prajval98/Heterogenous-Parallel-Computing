@@ -73,12 +73,12 @@ int main(int argc, char *argv[])
 
 	run_time = omp_get_wtime() - start_time;
 
-	printf(" Order %d multiplication in %f seconds \n", ORDER, run_time);
-	printf(" %d threads\n", omp_get_max_threads());
+	printf("Parallel: Order %d multiplication in %f seconds \n", ORDER, run_time);
+	printf("%d threads\n", omp_get_max_threads());
 	dN = (double)ORDER;
 	mflops = 2.0 * dN * dN * dN / (1000000.0* run_time);
 
-	printf(" Order %d multiplication at %f mflops\n", ORDER, mflops);
+	printf("Order %d multiplication at %f mflops\n", ORDER, mflops);
 
 	cval = Pdim * AVAL * BVAL;
 	errsq = 0.0;
@@ -97,5 +97,5 @@ int main(int argc, char *argv[])
 			*(C + (i*Ndim + j)) = 0.0;
 
 	serial(A, B, C, Ndim, Mdim, Pdim);
-	printf("\Done\n");
+	printf("Done\n");
 }

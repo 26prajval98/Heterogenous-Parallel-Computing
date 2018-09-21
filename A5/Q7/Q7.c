@@ -1,3 +1,5 @@
+//16CO145 Sumukha PK
+//16CO234 Prajval.M
 #include "omp.h"
 #include<stdio.h>
 #include<stdlib.h>

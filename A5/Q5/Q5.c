@@ -1,78 +1,101 @@
-#include "omp.h"
+#include <stdlib.h>
 #include <stdio.h>
-#include <time.h>
+#include <omp.h>
 
-#define MAX_THREADS 4
+#define ORDER 1000
+#define AVAL 3.0
+#define BVAL 5.0
+#define TOL  0.001
 
-static long num_steps = 100000;
-
-double step;
-double pi_s();
-
-void parallel()
-{
-    int i, j;
-    double pi, full_sum = 0.0;
-    double start_time, run_time;
-    double sum[MAX_THREADS];
-
-    step = 1.0 / (double)num_steps;
-
-    for (j = 1; j <= MAX_THREADS; j++)
-    {
-        omp_set_num_threads(j);
-        full_sum = 0.0;
-        start_time = omp_get_wtime();
-#pragma omp parallel private(i)
-        {
-            int id = omp_get_thread_num();
-            int numthreads = omp_get_num_threads();
-            double x;
-
-            double partial_sum = 0;
-
-#pragma omp single
-            printf(" num_threads = %d", numthreads);
-
-            for (i = id; i < num_steps; i += numthreads)
-            {
-                x = (i + 0.5) * step;
-                partial_sum += +4.0 / (1.0 + x * x);
-            }
-#pragma omp critical
-            full_sum += partial_sum;
-        }
-
-        pi = step * full_sum;
-        run_time = omp_get_wtime() - start_time;
-        printf("\n pi is %f in %f seconds %d threads \n ", pi, run_time, j);
-    }
+void serial(double * A, double * B, double *C, int Ndim, int Mdim, int Pdim) {
+	double t = omp_get_wtime();
+	double tmp;
+	for (int i = 0; i < Ndim; i++) {
+		for (int j = 0; j < Mdim; j++) {
+			tmp = 0.0;
+			for (int k = 0;k < Pdim;k++) {
+				tmp += *(A + (i*Ndim + k)) *  *(B + (k*Pdim + j));
+			}
+			*(C + (i*Ndim + j)) = tmp;
+		}
+	}
+	printf("Serial Code Time : %f\n", omp_get_wtime() - t);
 }
 
-void main()
+int main(int argc, char *argv[])
 {
-    //Calculate serial code's time and output
-    double start = omp_get_wtime();
-    double pi_serial = pi_s();
-    double end = omp_get_wtime();
-    printf("Time taken by serial code is %f\n", end - start);
+	int Ndim, Pdim, Mdim;   /* A[N][P], B[P][M], C[N][M] */
+	int i, j, k;
 
-    printf("Serial output value: %f\n", pi_serial);
+	double *A, *B, *C, cval, tmp, err, errsq;
+	double dN, mflops;
+	double start_time, run_time;
 
-    parallel();
-}
 
-//Serial code
-double pi_s()
-{
-    int i;
-    double x, pi, sum = 0.0;
-    step = 1.0 / (double)num_steps;
-    for (i = 0; i < num_steps; i++)
-    {
-        x = (i + 0.5) * step;
-        sum = sum + 4.0 / (1.0 + x * x);
-    }
-    pi = step * sum;
-    return pi;
+	Ndim = ORDER;
+	Pdim = ORDER;
+	Mdim = ORDER;
+
+	A = (double *)malloc(Ndim*Pdim * sizeof(double));
+	B = (double *)malloc(Pdim*Mdim * sizeof(double));
+	C = (double *)malloc(Ndim*Mdim * sizeof(double));
+
+	/* Initialize matrices */
+
+	for (i = 0; i<Ndim; i++)
+		for (j = 0; j<Pdim; j++)
+			*(A + (i*Ndim + j)) = AVAL;
+
+	for (i = 0; i<Pdim; i++)
+		for (j = 0; j<Mdim; j++)
+			*(B + (i*Pdim + j)) = BVAL;
+
+	for (i = 0; i<Ndim; i++)
+		for (j = 0; j<Mdim; j++)
+			*(C + (i*Ndim + j)) = 0.0;
+
+	start_time = omp_get_wtime();
+
+	/* Do the matrix product */
+
+#pragma omp parallel for private(tmp, i, j, k)  
+	for (i = 0; i<Ndim; i++) {
+		for (j = 0; j<Mdim; j++) {
+
+			tmp = 0.0;
+
+			for (k = 0;k<Pdim;k++) {
+				tmp += *(A + (i*Ndim + k)) *  *(B + (k*Pdim + j));
+			}
+			*(C + (i*Ndim + j)) = tmp;
+		}
+	}
+
+	run_time = omp_get_wtime() - start_time;
+
+	printf(" Order %d multiplication in %f seconds \n", ORDER, run_time);
+	printf(" %d threads\n", omp_get_max_threads());
+	dN = (double)ORDER;
+	mflops = 2.0 * dN * dN * dN / (1000000.0* run_time);
+
+	printf(" Order %d multiplication at %f mflops\n", ORDER, mflops);
+
+	cval = Pdim * AVAL * BVAL;
+	errsq = 0.0;
+	for (i = 0; i<Ndim; i++) {
+		for (j = 0; j<Mdim; j++) {
+			err = *(C + i * Ndim + j) - cval;
+			errsq += err * err;
+		}
+	}
+
+	if (errsq > TOL)
+		printf("\n Errors: %f", errsq);
+
+	for (i = 0; i<Ndim; i++)
+		for (j = 0; j<Mdim; j++)
+			*(C + (i*Ndim + j)) = 0.0;
+
+	serial(A, B, C, Ndim, Mdim, Pdim);
+	printf("\Done\n");
 }

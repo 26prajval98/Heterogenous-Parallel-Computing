@@ -1,3 +1,5 @@
+//16CO145 Sumukha PK
+//16CO234 Prajval.M
 #include "omp.h" /* OpenMP compiler directives, APIs are declared here */
 #include<stdio.h>
 void main()

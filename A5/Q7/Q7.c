@@ -22,7 +22,7 @@ void main()
     start = omp_get_wtime();
     double pi_parallel = parallel();
     end = omp_get_wtime();
-    printf("The value of pi from serial calculations is: %f\nTime taken is: %lf\n",pi_parallel,end-start);
+    printf("The value of pi from parallel calculations is: %f\nTime taken is: %lf\n",pi_parallel,end-start);
 }
 double serial()
 {

@@ -27,7 +27,6 @@ void main()
         for(i=0;i<n;i++)
         {
             X[i] = a*X[i] + Y[i];
-            //printf("%lld ID:%d\n",X[i],ID);
         }
     }
     double end = omp_get_wtime();
